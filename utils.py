@@ -25,11 +25,30 @@ website_scan = {"sushi-scan" : "https://sushiscan.su/manga/list-mode/",
                 "scan-manga" : "https://scan-manga.com"}
 
 scraper = cloudscraper.create_scraper()  # returns a CloudScraper instance
+
+dict_mois = {"janvier" : "01",
+             "février" : "02",
+             "mars" : "03",
+             "avril" : "04",
+             "mai" : "05",
+             "juin" : "06",
+             "juillet" : "07",
+             "août" : "08",
+             "septembre" : "09",
+             "octobre" : "10",
+             "novembre" : "11",
+             "décembre" : "12"}
 #############################################################################
+def test_internet(host='http://google.com'):
+    try:
+        urllib.request.urlopen(host) #Python 3.x
+        return True
+    except:
+        return False
 
 def format_date(t_d) :
     t_date = t_d.split(" ")
-    new_date = t_date[1].replace(",","") + " " +  t_date[0] + " " + t_date[2]
+    new_date = "/".join([t_date[1].replace(",",""),dict_mois[t_date[0]],t_date[2]])
     return new_date
 
 def format_txt_info(txt) :
@@ -65,8 +84,7 @@ def format_txt_info(txt) :
         return False
     return step1
 
-def get_all_mangas() :
-        
+def get_all_mangas() :  
     html_website = BeautifulSoup(scraper.get(website_scan["sushi-scan"]).text, 'html.parser')
     
     div_list = html_website.find("div", {"class" : "soralist"})
@@ -75,38 +93,65 @@ def get_all_mangas() :
     
     return all_books_txt
 
-def get_all_mangas_infos(list_mangas):
-    
+def get_all_datas_of_manga(title_manga, url_manga):
     # data to get :
         # left info : statut, type, année de sortie, auteur, posté le, mis à jour le
         # right info : all volumes and all url, number of volume
-    
-    data = []
-    
-    for title_manga, url_manga in list_mangas :
-        html_website = BeautifulSoup(scraper.get(url_manga).text, 'html.parser')
-        div_left_info = html_website.find("div", {"class" : "info-left"})
-        #div_right_info = html_website.find("div", {"class" : "info-right"})
-        div_tsinfo_bixbox = div_left_info.find("div", {"class" : "tsinfo bixbox"})
-        all_div_info = div_tsinfo_bixbox.findAll("div", {"class" : "imptdt"})
         
-        row = {"Titre":title_manga}
+    creators = []
+    volumes = []
+    
+    html_website = BeautifulSoup(scraper.get(url_manga).text, 'html.parser')
         
-        for div_info in all_div_info :
-            txt_info = div_info.text
-            if format_txt_info(txt_info) :
-                k,v = format_txt_info(txt_info)
-                #v = div_info.find("i").text
-                row[k] = v
+    div_left_info = html_website.find("div", {"class" : "info-left"})
+    div_right_info = html_website.find("div", {"class" : "info-right"})
+        
+    # left info
+    div_tsinfo_bixbox = div_left_info.find("div", {"class" : "tsinfo bixbox"})
+    all_div_info = div_tsinfo_bixbox.findAll("div", {"class" : "imptdt"})
+        
+    synopsis = div_right_info.find("div", {"class" : "entry-content entry-content-single"})
+        
+    row = {"Titre":title_manga,
+           "Synopsis" : synopsis.text}
+        
+    for div_info in all_div_info :
+        txt_info = div_info.text
+        if format_txt_info(txt_info) :
+            k,v = format_txt_info(txt_info)
+            row[k] = v
            
-        data.append((row["Titre"],
-                     row["Statut"],
-                     row["Type"],
-                     row["Année de Sortie"] if "Année de Sortie" in row else "Unknown",
-                     row["Auteur"] if "Auteur" in row else row["Dessinateur"],
-                     row[""]))
+    serie = (row["Titre"],
+             row["Synopsis"],
+             row["Type"],
+             row["Année de Sortie"] if "Année de Sortie" in row else "None",
+             row["Statut"])
         
-    return data
+       
+    # right info
+    div_chapterlist = div_right_info.find("div", {"id" : "chapterlist"})
+    all_a_chapters = div_chapterlist.findAll("a")
+    
+    for a_chapter in all_a_chapters :
+        volume_name = a_chapter.find("span",{"class" : "chapternum"}).text.strip()
+        date_ajout = a_chapter.find("span", {"class" : "chapterdate"}).text
+        
+        t = a_chapter["href"].split("-")
+        type_volume = t[-2].lower()
+        numero = t[-1].replace("/","")
+        print(type_volume, numero)
+        volumes.append((volume_name,
+                        numero,
+                        type_volume,
+                        format_date(date_ajout),
+                        a_chapter["href"],
+                        title_manga))
+        
+        
+    creators.append((row["Auteur"] if "Auteur" in row else "", "auteur"))
+    creators.append((row["Dessinateur"] if "Dessinateur" in row else "", "dessinateur"))
+        
+    return creators, serie, volumes
 
 def getFormatFile(file):
     return file.split(".")[1]
@@ -133,140 +178,44 @@ def getFormatImage(image_url) :
     
     return "."+format_img
 
-def convert_to_pdf_1(nom_manga_ebook,folder):       
-    
-    volumes = [name for name in os.listdir(folder) if os.path.isdir(os.path.join(folder, name))]
-
-    for tome in volumes:
-        DIR = folder+"/"+tome
-
-        pages = [name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))]
-        imagelist = []
         
-        sorted_pages = sortedFiles(pages)
+def convert_to_pdf(path_pdf_file, dir_tmp_pages="tmp/pages/"):
+    
+    sorted_pages = [os.path.join(dir_tmp_pages, name) for name in sortedFiles(os.listdir(dir_tmp_pages))]
+    
+    with open(path_pdf_file, "wb") as f :
+        f.write(img2pdf.convert(sorted_pages))
 
-        for p in sorted_pages:
-            if getFormatFile(p) == "webp" :
-                new_name = getNameFile(p)+".png"
-                webp.dwebp(DIR+"/"+p, DIR+"/"+new_name,"-o") 
-                
-                image = Image.open(DIR+"/"+new_name)
-                im = image.convert('RGB')
-                imagelist.append(im)
-                
-                os.remove(DIR+"/"+p)
-                
-            else :
-                image = Image.open(DIR+"/"+p)
-                im = image.convert('RGB')
-                imagelist.append(im)
+    print(path_pdf_file,"généré")        
         
-        imagelist[0].save(folder+"/"+nom_manga_ebook+tome+".pdf",save_all=True, append_images=imagelist[1:])
-        print(folder+"/"+nom_manga_ebook+tome+".pdf","généré")
+def get_cover_manga(title_manga, n_vol, url_manga, download_dir) :
+    html_volume = BeautifulSoup(scraper.get(url_manga).text, 'html.parser')
 
-def convert_to_pdf_2(nom_manga_ebook,folder):       
+    url_cover = html_volume.find("div",{"id":"readerarea"}).findAll("img")[0]
     
-    volumes = [name for name in os.listdir(folder) if os.path.isdir(os.path.join(folder, name))]
 
-    for tome in volumes:
-        DIR = folder+"/"+tome
-
-        sorted_pages = [os.path.join(DIR, name) for name in sortedFiles(os.listdir(DIR))]
-
-        
-        with open(folder+"/"+nom_manga_ebook+tome+".pdf", "wb") as f :
-            f.write(img2pdf.convert(sorted_pages))
-
-        print(folder+"/"+nom_manga_ebook+tome+".pdf","généré")
-
-
-
-
-def get_all_images() :
-    #html_website = BeautifulSoup(requests.get(website_url + nom_manga).text,"lxml")
-    html_website = BeautifulSoup(scraper.get(website_url + nom_manga).text, 'html.parser')
-    div_url_tomes = html_website.findAll("div", {"class" : "eph-num"})
-    url_tomes = [div.find("a") for div in div_url_tomes][1:]
-
-    n_tomes = len(url_tomes)
-    
-    for num_tome, url_tome in enumerate(url_tomes) :
-        #on commence par le dernier
-        tome = "tome_" + str(n_tomes - num_tome)
-        
-        if not (os.path.exists(folder+"/"+tome)):
-                            
-            create_directory(folder+"/"+tome)
-            
-            time.sleep(random.randint(5,10))
-            html_tome = BeautifulSoup(scraper.get(url_tome["href"]).text,"html.parser")
-            url_pages = html_tome.find("div",{"id":"readerarea"}).findAll("img")
-            
-            for num_page, url_img_page in enumerate(url_pages) :
-                clean_url_img = url_img_page["src"]
-                format_img = getFormatImage(clean_url_img)
+    clean_url_img = url_cover["src"]
+    format_img = getFormatImage(clean_url_img)
                 
-                if not (os.path.exists(folder+"/"+tome+"/"+str(num_page+1)+format_img)) :
-                    time.sleep(random.random())
-                    urllib.request.urlretrieve(clean_url_img, 
-                                               folder+"/"+tome+"/"+str(num_page+1)+format_img)
-                    print("tome",tome,"page",num_page+1,"download")
-        else :
-            print("Vous avez déjà téléchargé le",tome)
-            n_img_in_folder = len([name for name in os.listdir(folder+"/"+tome) if os.path.isfile(os.path.join(folder+"/"+tome, name))])
-            print("=>",n_img_in_folder), "images téléchargées..."
-            
-            time.sleep(random.randint(5,10))
-            html_tome = BeautifulSoup(scraper.get(url_tome["href"]).text,"html.parser")
-            url_pages = html_tome.find("div",{"id":"readerarea"}).findAll("img")
-            n_pages = len(url_pages)
-            print("=>", n_pages, "images à télécharger...")
-            
-            if n_pages != n_img_in_folder :
+    time.sleep(random.random())
+    urllib.request.urlretrieve(clean_url_img, 
+                               download_dir+"cover_"+title_manga+n_vol+format_img)
+    
+    return download_dir+"cover_"+title_manga+n_vol+format_img
+    
+def get_all_pages_url(url_volume,  ) :
+    html_volume = BeautifulSoup(scraper.get(url_volume).text, 'html.parser')
+
+    list_pages = html_volume.find("div",{"id":"readerarea"}).findAll("img")
+    list_url = [img["src"] for img in list_pages]
+    
+    return list_url
+
+def download_page(url_page, num_page, dir_tmp_pages="tmp/pages/") :
+        
+        format_img = getFormatImage(url_page)
                 
-                for num_page, url_img_page in enumerate(url_pages) :
-                    clean_url_img = url_img_page["src"]
-                    format_img = getFormatImage(clean_url_img)
-                    
-                    if not (os.path.exists(folder+"/"+tome+"/"+str(num_page+1)+format_img)) :
-                        print(clean_url_img)
-                        time.sleep(random.random())
-                        urllib.request.urlretrieve(clean_url_img, 
-                                                   folder+"/"+tome+"/"+str(num_page+1)+format_img)
-                        print("tome",tome,"page",num_page+1,"download")
-            else :
-                print("Toutes les pages du tome ont été téléchargées !")
-
-
-
-
-
-
-
-    
-#######
-#website_url = "https://sushi-scan.su/manga/"
-#folder = "./Chainsaw_Man"
-#nom_manga = "chainsaw-man"
-#nom_manga_ebook = "chainsaw_man_"
-#folder = "./Tokyo_Ghoul"
-#nom_manga_ebook = "tokyo_ghoul_" 
-
-#folder = "./Monster"
-#nom_manga = "monster-edition-deluxe"
-#nom_manga_ebook = "monster_"
-
-#folder = "./Tokyo_Ghoul"
-#nom_manga = "tokyo-ghoul"
-#nom_manga_ebook = "tokyo_ghoul_"
-#######  
-
-
-
-#get_all_images()
-#convert_to_pdf_2(nom_manga_ebook, folder)    
-
-    
-
-    
-
+        if not (os.path.exists(dir_tmp_pages+str(num_page+1)+format_img)) :
+            time.sleep(random.random())
+            urllib.request.urlretrieve(url_page, 
+                                       dir_tmp_pages+str(num_page+1)+format_img)
