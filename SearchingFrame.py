@@ -18,10 +18,9 @@ from tkinter import font
 
 from PIL import Image, ImageTk
 
-
 from DbManager import DbManager
 from MediaPlayerFrame import MediaPlayerFrame
-from FileManager import DIR_IMG_SEARCH
+from FileManager import DIR_IMG_SEARCH, DIR_IMG_ICON
 
 class SearchingFrame(tk.Frame):
     
@@ -44,7 +43,8 @@ class SearchingFrame(tk.Frame):
         # Images
         self.bg_img = ImageTk.PhotoImage(Image.open(DIR_IMG_SEARCH + 
                                                     random.choice(list_bg_img)))
-        
+        self.bg_button_top100 = ImageTk.PhotoImage(Image.open(DIR_IMG_ICON +
+                                                              "icon_top100_100.png"))
         
         # String Variable for Dynamic Labels
         self.var_search = tk.StringVar()
@@ -52,8 +52,12 @@ class SearchingFrame(tk.Frame):
         self.var_results = tk.StringVar()
         
         # Define all widgets
-        self.canvas = tk.Canvas(self, width=1000, height=450, bd=0, relief='ridge')
-    
+        self.canvas = tk.Canvas(self, 
+                                width=1000, 
+                                height=450, 
+                                bd=0, 
+                                highlightthickness=0,
+                                relief='ridge')
         self.canvas.create_image(0,0, image=self.bg_img , anchor="nw") 
         self.canvas.pack(expand=True, fill="both")
              
@@ -72,21 +76,23 @@ class SearchingFrame(tk.Frame):
                                    borderwidth=0,
                                    selectforeground="white",
                                    selectbackground="black" )
-        self.search_result.bind("<<ListboxSelect>>", self.redirect)
-        
-        
+        self.search_result.bind("<<ListboxSelect>>", self.redirect_serie_frame)
         self.canvas_result = self.canvas.create_window(500, 310, 
                                                        window=self.search_result, 
                                                        anchor="center",
                                                        state="hidden")
         
-        self.mediaplayer = MediaPlayerFrame(self)
+        self.top100_button = self.canvas.create_image(920, 70, image=self.bg_button_top100)
+        self.canvas.tag_bind(self.top100_button, "<Button-1>", self.redirect_malranking_frame)
         
-        # pack all widgets
+        # mediaplayer
+        self.mediaplayer = MediaPlayerFrame(self)
         self.mediaplayer.pack(side=tk.BOTTOM, fill=tk.X)
         
-    
-    def redirect(self, event):
+    def redirect_malranking_frame(self, event):
+        self.parent.show_malranking_frame()
+        
+    def redirect_serie_frame(self, event):
         selection = event.widget.curselection()
         if selection:
             index = selection[0]

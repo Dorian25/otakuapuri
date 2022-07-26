@@ -15,7 +15,11 @@ import cloudscraper
 import urllib.request
 
 import time
+from datetime import datetime
 import random
+import pandas as pd
+
+
 
 
 #############################################################################
@@ -219,3 +223,64 @@ def download_page(url_page, num_page, dir_tmp_pages="tmp/pages/") :
             time.sleep(random.random())
             urllib.request.urlretrieve(url_page, 
                                        dir_tmp_pages+str(num_page+1)+format_img)
+            
+def get_synonyms(url): 
+    serie_html = BeautifulSoup(scraper.get(url).text, 'html.parser')
+    
+    """span_title_english = serie_html.find("span", {"class":"title-english"})
+    
+    if span_title_english:
+        return span_title_english.text.strip()
+    else :
+        return ""
+        
+    """
+    
+    left_side_div = serie_html.find("div", {"class" : "leftside"})\
+                              .findAll("div", {"class" : "spaceit_pad"})
+                              
+    for div in left_side_div :
+        if div.text.startswith("French:"):
+            return div.text.split(":")[1].strip()
+        if div.text.startswith("Type:"):
+            return ""
+    print("end loop")                          
+    return ""  
+          
+def extract_top100_allmanga():
+    url = "https://myanimelist.net/topmanga.php"
+    
+    html_website_p1 = BeautifulSoup(scraper.get(url).text, 'html.parser')
+    html_website_p2 = BeautifulSoup(scraper.get(url+"?limit=50").text, 'html.parser')
+    
+    # liste de <tr class="ranking-list"></tr>
+    list_tr_p1 = html_website_p1.findAll("tr", {"class" : "ranking-list"})
+    list_tr_p2 = html_website_p2.findAll("tr", {"class" : "ranking-list"}) 
+        
+    top_100 = []
+        
+    # each tr == a row
+    for tr in list_tr_p1+list_tr_p2[:10] :
+        # each td == a column
+        rank = tr.find("td",{"class": "rank ac"}).text
+        title = tr.find("h3",{"class":"manga_h3"}).text
+        href = tr.find("h3", {"class" : "manga_h3"}).find("a")["href"]
+        french_title = get_synonyms(href)
+        #title_info = detail.find("div",{"class":"information di-ib mt4"}).text
+        score = tr.find("td",{"class": "score ac fs14"}).text
+            
+        top_100.append((rank.replace("\n",""),
+                        title if len(french_title) == 0 else french_title,
+                        score.replace("\n","")))
+    
+    save_top100(top_100, "allmanga")    
+    
+    return top_100
+
+def save_top100(top_100, category, dir_docs="docs/"):        
+    date = datetime.now().strftime("%d_%m_%Y")
+     
+    df_top_100 = pd.DataFrame(top_100, columns =['Rank', 'Title', 'Score'])
+    
+    if category == "allmanga":
+        df_top_100.to_csv(f"top100_allmanga-{date}.csv", index=False)    

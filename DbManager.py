@@ -93,6 +93,12 @@ class DbManager():
         self.cursor.execute("SELECT title FROM serie WHERE title LIKE ?", (typed+"%",))
         res = [r[0] for r in self.cursor.fetchall()]
         return res
+    
+    def create_virtual_tables(self):
+        try:
+            self.cursor.execute(''' CREATE VIRTUAL TABLE serie USING fts5(title)''')
+        except sqlite3.Error as error:
+            print("Error", "- create_virtual_tables DbManager -", error) 
         
     def create_tables(self):
         try :

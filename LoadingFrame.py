@@ -35,7 +35,11 @@ class LoadingFrame(tk.Frame):
         self.logo_img = ImageTk.PhotoImage(Image.open(DIR_IMG_LOAD + "logo_128.png"))
         
         # widgets
-        self.canvas = tk.Canvas(self, width=1000, height=500, bd=0, relief='ridge')
+        self.canvas = tk.Canvas(self, width=1000, 
+                                height=500, 
+                                bd=0,
+                                highlightthickness=0,
+                                relief='ridge')
     
         self.canvas.create_image(0,0, image=self.bg_img , anchor="nw") 
         self.canvas.create_image(500,200, image=self.logo_img) 

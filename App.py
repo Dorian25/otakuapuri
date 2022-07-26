@@ -5,12 +5,14 @@ Created on Mon Jul 18 21:20:08 2022
 @author: Dorian
 """
 
-import tkinter as tk
+import mtTkinter as tk
+#import tkinter as tk
 import pygame
 
 from LoadingFrame import LoadingFrame
 from SearchingFrame import SearchingFrame
 from SerieFrame import SerieFrame
+from MALRankingFrame import MALRankingFrame
 from FileManager import FileManager, DIR_IMG_ICON
 
 class App(tk.Tk):
@@ -65,6 +67,15 @@ class App(tk.Tk):
                    " - " + 
                    str(len(self.current_frame.serie_infos["volumes"])) + 
                    " volumes are available !")
+        
+    def show_malranking_frame(self):
+        if self.current_frame :
+            self.current_frame.destroy()
+        
+        self.current_frame = MALRankingFrame(parent=self)
+        self.current_frame.pack(expand=True, fill="both")
+        
+        self.title("Ranking - MyAnimeList.net")
         
         
         

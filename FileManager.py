@@ -15,6 +15,7 @@ DIR_IMG_MP3 = DIR_IMG + "mediaplayer/"
 DIR_MUSIC = "musics/"
 DIR_MUSIC_PLAYLIST = DIR_MUSIC + "playlist/"
 DIR_MUSIC_LOAD = DIR_MUSIC + "home/"
+DIR_DOC = "docs/"
 DIR_TMP_COVERS = "tmp/covers/"
 DIR_TMP_PAGES = "tmp/pages/"
 
