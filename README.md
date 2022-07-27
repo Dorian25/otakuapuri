@@ -10,6 +10,8 @@
   - [Dependencies](#dependencies)
   - [Step by step](#step-by-step)
 - [Contributing](#contributing)
+- [Credits](#credits)
+- [Disclaimer](#disclaimer)
 - [License](#license)
 
 ## Features
@@ -21,11 +23,18 @@
 | ------ | ------ |
 | img2pdf | https://gitlab.mister-muffin.de/josch/img2pdf |
 | mtTkinter | https://github.com/RedFantom/mtTkinter |
-| tkinter | https://docs.python.org/3/library/tkinter.html |
 
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
+## Credits
+- Mangas are collected on [Sushi-Scan](https://sushiscan.su/)
+- `requirements.txt` was generated with the library [pipreqs](https://github.com/bndr/pipreqs)
+
+## Disclaimer
+Please support the publishers and authors by purchasing their works :pray:
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+
