@@ -21,6 +21,7 @@ from PIL import Image, ImageTk
 from DbManager import DbManager
 from MediaPlayerFrame import MediaPlayerFrame
 from FileManager import DIR_IMG_SEARCH, DIR_IMG_ICON
+from CustomListBox import CustomListBox
 
 class SearchingFrame(tk.Frame):
     
@@ -75,15 +76,15 @@ class SearchingFrame(tk.Frame):
         self.canvas.create_window(500, 200, window=self.search_entry, anchor="center")
         self.set_placeholder()
 
-        self.search_result = tk.Listbox(self.canvas,
+        self.search_result = CustomListBox(self.canvas,
                                    listvariable=self.var_results,
-                                   width=40,
+                                   width=52,
                                    font=self.FONT_SEARCH_RESULT,
                                    borderwidth=0,
                                    selectforeground="white",
-                                   selectbackground="black" )
+                                   selectbackground="black")
         self.search_result.bind("<<ListboxSelect>>", self.redirect_serie_frame)
-        self.canvas_result = self.canvas.create_window(500, 310, 
+        self.canvas_result = self.canvas.create_window(500, 313, 
                                                        window=self.search_result, 
                                                        anchor="center",
                                                        state="hidden")
