@@ -61,9 +61,21 @@ class MediaPlayerFrame(tk.Frame):
                                            compound="center",
                                            borderwidth=0)
 
-        self.button_previous = tk.Button(self, image=self.bg_prevbutton, command=self.prev_song, borderwidth=0)
-        self.button_play = tk.Button(self, image=self.bg_playbutton, command=self.play_song, borderwidth=0)
-        self.button_next = tk.Button(self, image=self.bg_nextbutton, command=self.next_song, borderwidth=0)
+        self.button_previous = tk.Button(self, 
+                                         image=self.bg_prevbutton, 
+                                         command=self.prev_song, 
+                                         borderwidth=0,
+                                         cursor="@"+DIR_IMG_ICON+"aero_link.cur")
+        self.button_play = tk.Button(self, 
+                                     image=self.bg_playbutton, 
+                                     command=self.play_song, 
+                                     borderwidth=0,
+                                     cursor="@"+DIR_IMG_ICON+"aero_link.cur")
+        self.button_next = tk.Button(self, 
+                                     image=self.bg_nextbutton, 
+                                     command=self.next_song, 
+                                     borderwidth=0,
+                                     cursor="@"+DIR_IMG_ICON+"aero_link.cur")
         
         self.background_image_label.place(x=0, y=0, relwidth=1, relheight=1)
         self.button_previous.pack(side=tk.LEFT)
