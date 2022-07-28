@@ -25,7 +25,12 @@ from FileManager import DIR_IMG_SEARCH, DIR_IMG_ICON
 class SearchingFrame(tk.Frame):
     
     FONT_SEARCH_ENTRY = ('Verdana',16)
+    FONT_SEARCH_ENTRY_PLACEHOLDER = ('Verdana',16,'italic')
     FONT_SEARCH_RESULT = ('Verdana', 12)
+    
+    COLOR_SEARCH_ENTRY_PLACEHOLDER = "#c7c7cc"
+    COLOR_SEARCH_ENTRY = "#000"
+    
     
     def __init__(self, parent, data):
         tk.Frame.__init__(self, parent)
@@ -48,7 +53,6 @@ class SearchingFrame(tk.Frame):
         
         # String Variable for Dynamic Labels
         self.var_search = tk.StringVar()
-        self.var_search.set("Search a manga")
         self.var_results = tk.StringVar()
         
         # Define all widgets
@@ -62,12 +66,14 @@ class SearchingFrame(tk.Frame):
         self.canvas.pack(expand=True, fill="both")
              
         self.search_entry = tk.Entry(self.canvas, 
-                                width=40,
-                                textvariable=self.var_search,
-                                font=self.FONT_SEARCH_ENTRY,
-                                highlightthickness=2)
+                                     width=40,
+                                     textvariable=self.var_search)
         self.search_entry.bind('<KeyRelease>', self.check_search)
+        self.search_entry.bind('<KeyPress>', self.onKeyPress)
+        self.search_entry.bind("<FocusIn>", self.focus_in_entry)
+        self.search_entry.bind("<FocusOut>", self.focus_out_entry)
         self.canvas.create_window(500, 200, window=self.search_entry, anchor="center")
+        self.set_placeholder()
 
         self.search_result = tk.Listbox(self.canvas,
                                    listvariable=self.var_results,
@@ -89,8 +95,34 @@ class SearchingFrame(tk.Frame):
         self.mediaplayer = MediaPlayerFrame(self)
         self.mediaplayer.pack(side=tk.BOTTOM, fill=tk.X)
         
+    def focus_in_entry(self, event):
+        self.search_entry.configure(highlightbackground="#007aff", 
+                                    highlightcolor="#007aff",
+                                    highlightthickness=2)
+        
+        if self.var_search.get() == "Search a manga":
+            self.search_entry.delete('0', 'end')
+            self.search_entry.config(font=self.FONT_SEARCH_ENTRY)
+            self.search_entry.config(fg=self.COLOR_SEARCH_ENTRY)
+        
+    def focus_out_entry(self, event):
+        print("out")
+        self.search_entry.config(highlightthickness=0)
+        if self.search_entry.get() == "":
+            self.set_placeholder()
+            
     def redirect_malranking_frame(self, event):
         self.parent.show_malranking_frame()
+        
+    def set_placeholder(self):
+        self.search_entry.insert(0, "Search a manga")
+        self.search_entry.config(fg=self.COLOR_SEARCH_ENTRY_PLACEHOLDER)
+        self.search_entry.config(font=self.FONT_SEARCH_ENTRY_PLACEHOLDER)
+        
+    def set_default_style(self):
+        self.search_entry.config(font=self.FONT_SEARCH_ENTRY)
+        self.search_entry.config(fg=self.COLOR_SEARCH_ENTRY)
+
         
     def redirect_serie_frame(self, event):
         selection = event.widget.curselection()
@@ -111,13 +143,24 @@ class SearchingFrame(tk.Frame):
         
         # add result
         self.var_results.set(results)
+    def onKeyPress(self, event):
+        typed = self.search_entry.get()
+        
+        if "Search a manga" in typed :
+            typed = typed.replace("Search a manga","")
+            self.var_search.set(typed)
+            self.set_default_style()
         
     def check_search(self, event):
         typed = self.search_entry.get()
-        
+
         if typed == '' :
             # hide search results
             self.canvas.itemconfigure(self.canvas_result, state='hidden')
+            self.set_placeholder()
+            self.search_entry.icursor(0)
+        elif typed == 'Search a manga':
+            pass
         else :
             db_manager = DbManager("test.db")
             res = db_manager.search_serie(typed)
