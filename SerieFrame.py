@@ -81,6 +81,7 @@ class SerieFrame(tk.Frame):
         #self.label_auteur = tk.Label(self.frame_info, text=self.infos["title"]auteur)
     
         self.canvas_volumes = tk.Canvas(self, bg="#c7c7cc", bd=0, relief='ridge')
+        self.canvas_volumes.bind_all("<MouseWheel>", self.on_mousewheel)
         self.scrollbar = ttk.Scrollbar(self.canvas_volumes, 
                                        orient="vertical",
                                        command=self.canvas_volumes.yview)
@@ -117,6 +118,9 @@ class SerieFrame(tk.Frame):
         # delete all covers in tmp dir
         self.parent.show_searching_frame(None)
         FileManager().delete_tmp_files()
+        
+    def on_mousewheel(self, event):
+        self.canvas_volumes.yview_scroll(int(-1*(event.delta/120)), "units")    
         
     def onClickVolume(self, event):
         if messagebox.askyesno("Download","Download this volume ?") :
