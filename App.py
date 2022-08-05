@@ -5,6 +5,7 @@ Created on Mon Jul 18 21:20:08 2022
 @author: Dorian
 """
 
+import os, sys
 import mtTkinter as tk
 #import tkinter as tk
 import pygame
@@ -81,6 +82,14 @@ class App(tk.Tk):
         
 ###########
 if __name__ == "__main__":
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):        
+    	# sys._MEIPASS = C:\Users\xxxx\AppData\Local\Temp\_MEIxxxxxx
+        os.chdir(sys._MEIPASS)
+    
+        #create tmp directories
+        os.makedirs(os.path.join("tmp", "pages"))
+        os.makedirs(os.path.join("tmp", "covers"))
+        
     app = App()
     app.mainloop()
     FileManager().delete_tmp_files()

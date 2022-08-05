@@ -91,19 +91,21 @@ class MediaPlayerFrame(tk.Frame):
             pygame.mixer.music.pause()
             self.var_status_mp.set("pause")
             self.var_track_mp.set("|| Paused")
-            self.button_play.configure(image=self.bg_pausebutton)
+            self.button_play.configure(image=self.bg_playbutton)
             self.update()
         elif self.var_status_mp.get() == "pause" :
             pygame.mixer.music.unpause()
             self.var_status_mp.set("play")
             self.var_track_mp.set("You're listening to : "+self.playlist[self.num_piste])
-            self.button_play.configure(image=self.bg_playbutton)
+            self.button_play.configure(image=self.bg_pausebutton)
             self.update()
         else :
+            self.var_status_mp.set("play")
             self.var_track_mp.set("You're listening to : "+self.playlist[self.num_piste])      
             pygame.mixer.music.load(DIR_MUSIC_PLAYLIST+self.playlist[self.num_piste])
             pygame.mixer.music.play()
-            self.var_status_mp.set("play")
+            self.button_play.configure(image=self.bg_pausebutton)
+            self.update()
         
     def next_song(self) :
         if self.var_status_mp.get() == "play" :
