@@ -7,6 +7,7 @@ Created on Mon Jul 18 22:00:34 2022
 
 import tkinter as tk
 from tkinter import ttk
+import random
 
 from tkinter import filedialog
 from tkinter import messagebox
@@ -16,14 +17,13 @@ from PIL import Image, ImageTk
 import pygame
 import time
 
-from DbManager import DbManager
 from FileManager import FileManager, DIR_IMG_LOAD, DIR_MUSIC_LOAD
 from utils import *
 
 class LoadingFrame(tk.Frame):
     DEFAULT_MAX_VAL_PB = 60
     
-    def __init__(self, parent):
+    def __init__(self, parent, quote_txt):
         tk.Frame.__init__(self, parent)
         
         self.parent = parent
@@ -33,6 +33,7 @@ class LoadingFrame(tk.Frame):
         # images
         self.bg_img = ImageTk.PhotoImage(Image.open(DIR_IMG_LOAD + "sea.jpg"))
         self.logo_img = ImageTk.PhotoImage(Image.open(DIR_IMG_LOAD + "logo_128.png"))
+        self.parchemin_img = ImageTk.PhotoImage(Image.open(DIR_IMG_LOAD + "parchemin_500.png"))
         
         # widgets
         self.canvas = tk.Canvas(self, width=1000, 
@@ -42,7 +43,8 @@ class LoadingFrame(tk.Frame):
                                 relief='ridge')
     
         self.canvas.create_image(0,0, image=self.bg_img , anchor="nw") 
-        self.canvas.create_image(500,200, image=self.logo_img) 
+        self.canvas.create_image(500,200, image=self.logo_img)
+        self.canvas.create_image(500,380, image=self.parchemin_img)
         
         self.canvas.pack(expand=True, fill="both")
         
@@ -63,11 +65,12 @@ class LoadingFrame(tk.Frame):
         
         self.canvas.create_window(500, 280, window=self.progressbar)
         
-        self.progressbar_txt = self.canvas.create_text(500,
-                                                       315,
-                                                       fill="white",
-                                                       font="Verdana 20 bold",
-                                                       text="Welcome to the board !")
+        self.quote_txt = self.canvas.create_text(500,
+                                                 380,
+                                                 fill="black",
+                                                 font=("Ink Free",13,"bold"),
+                                                 width=400,
+                                                 text=quote_txt)
 
         
     def animate(self):
@@ -75,48 +78,30 @@ class LoadingFrame(tk.Frame):
         pygame.init()
         pygame.mixer.init()
         # Load and play sea sound
-        pygame.mixer.music.load(DIR_MUSIC_LOAD+"sea_sound.mp3")
-        pygame.mixer.music.play(-1)
-        
-        db_manager = DbManager("test.db")
-        
-        key_figures = {}
+        list_musics = os.listdir(DIR_MUSIC_LOAD)
+        pygame.mixer.music.load(DIR_MUSIC_LOAD+random.choice(list_musics))
+        #pygame.mixer.music.play(-1) #music repeats indefinitely
+        pygame.mixer.music.play()
         
         try :
             if test_internet():
-                if db_manager.is_empty_db():
-                    self.realtime_animation()
-                else :
-                    self.default_animation()
                 
-                key_figures["number_of_series"] = db_manager.count_series()
-                key_figures["number_of_volumes"] = db_manager.count_volumes()
-                
-                db_manager.close()
+                self.default_animation()
+
                 pygame.quit()
                 
-                self.parent.show_searching_frame(key_figures)    
+                self.parent.show_searching_frame()    
             else:
-                messagebox.showerror("No connection", "Please activate your connection !")
+                #show error frame
+                self.parent.show_error_frame("internet")
         except ConnectionError:
-            messagebox.showerror("No connection", "Please activate your connection !")
+            messagebox.showerror("Show error frame", "Please activate your connection !")
         
     
     def default_animation(self):
         # animation de chargement
         for i in range(1,self.DEFAULT_MAX_VAL_PB+1):
             self.progressbar["value"] = i
-            self.canvas.itemconfig(self.progressbar_txt, text="{:.1f}%".format(100 * i/self.DEFAULT_MAX_VAL_PB))
+            #self.canvas.itemconfig(self.progressbar_txt, text="{:.1f}%".format(100 * i/self.DEFAULT_MAX_VAL_PB))
             self.update()
             time.sleep(0.1)
-            
-    def realtime_animation(self):
-        db_manager = DbManager("test.db")
-        #self.progressbar.maximum = 
-        pass
-        
-
-        
-         
-
-    

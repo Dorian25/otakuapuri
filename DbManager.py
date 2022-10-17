@@ -6,9 +6,68 @@ Created on Mon Jul 18 22:54:46 2022
 """
 
 import sqlite3
+import json
+import requests
+from Serie import Serie
 
-class DbManager():
+class MongoDBManager:
+    def __init__(self):
+        self.url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
+        self.API_KEY = 'o8pywKI0RGODzcJiMIG7gvKehnmjAo5zIlN6uJGSlVOiRddZfptPIYtjF0d6Ka8n'
+        self.headers = {'Content-Type': 'application/json',
+                        'Access-Control-Request-Headers': '*',
+                        'api-key': self.API_KEY,
+        }
     
+    def get_serie_infos(self, titre_serie):
+        action = "findOne"
+        serie = None
+        
+        payload = json.dumps({"collection": "sushiscan",
+                              "database": "getmanga_db",
+                              "dataSource": "GetMangaCluster",
+                              "filter": {"Titre": titre_serie},
+                              "projection": {"_id": 0}
+                              })
+
+
+        try:
+            response = requests.request("POST", self.url+action, headers=self.headers, data=payload)
+            response_json = response.json()
+            serie = Serie(response_json["document"])
+        except Exception as e:
+            print("erreur", e)
+            return serie
+        finally:
+            return serie
+            
+        
+    def get_all_series(self):
+        action = "find"
+        
+        payload = json.dumps({
+            "collection": "sushiscan",
+            "database": "getmanga_db",
+            "dataSource": "GetMangaCluster",
+            "projection": {
+                "_id": 0,
+                "Titre": 1
+            }
+        })
+
+
+        try:
+            response = requests.request("POST", self.url+action, headers=self.headers, data=payload)
+            json_response = response.json()
+          
+            return [doc["Titre"] for doc in json_response["documents"]]
+        except:
+            print("erreur")
+            return False
+                
+###
+
+class SQLiteManager():
     def __init__(self, db_name):
         try :
             self.connection = sqlite3.connect(db_name)

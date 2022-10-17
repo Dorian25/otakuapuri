@@ -6,15 +6,18 @@ Created on Mon Jul 18 21:20:08 2022
 """
 
 import os, sys
+import random
 import mtTkinter as tk
-#import tkinter as tk
 import pygame
 
 from LoadingFrame import LoadingFrame
+from ErrorFrame import ErrorFrame
 from SearchingFrame import SearchingFrame
 from SerieFrame import SerieFrame
 from MALRankingFrame import MALRankingFrame
+from DbManager import MongoDBManager
 from FileManager import FileManager, DIR_IMG_ICON
+from utils import *
 
 class App(tk.Tk):
     
@@ -35,38 +38,43 @@ class App(tk.Tk):
         self.iconbitmap(DIR_IMG_ICON + 'icon.ico')
         self.title('Get-Mangas !')
         
+        self.series_available = MongoDBManager().get_all_series()
+        
         self.current_frame = None
-            
-        self.show_loading_frame()
+        
+        if test_internet():
+            self.show_loading_frame(random.choice(quotes_anime))
+        else :
+            self.show_error_frame("internet")
     
-    def show_searching_frame(self, key_figures):
+    def show_searching_frame(self):
         if self.current_frame :
             self.current_frame.destroy()
         
-        self.current_frame = SearchingFrame(parent=self, data=key_figures)
+        self.current_frame = SearchingFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
         
-        self.title("Get-Mangas !")
+        self.title("Get-Mangas ! ["+str(len(self.series_available))+" series available]")
         
-    def show_loading_frame(self):
+    def show_loading_frame(self, quote):
         if self.current_frame :
             self.current_frame.destroy()
             
-        self.current_frame = LoadingFrame(parent=self)
+        self.current_frame = LoadingFrame(parent=self, quote_txt=quote)
         self.current_frame.pack(expand=True, fill="both")
         
         self.current_frame.animate()
              
-    def show_serie_frame(self, serie_name, serie_infos):
+    def show_serie_frame(self, serie):
         if self.current_frame :
             self.current_frame.destroy()
             
-        self.current_frame = SerieFrame(parent=self, name=serie_name, infos=serie_infos)
+        self.current_frame = SerieFrame(parent=self, serie_obj=serie)
         self.current_frame.pack(expand=True, fill="both")
         
-        self.title(self.current_frame.serie_infos["title"] + 
+        self.title(self.current_frame.serie_obj.titre + 
                    " - " + 
-                   str(len(self.current_frame.serie_infos["volumes"])) + 
+                   str(len(self.current_frame.serie_obj.volumes)) + 
                    " volumes are available !")
         
     def show_malranking_frame(self):
@@ -78,8 +86,16 @@ class App(tk.Tk):
         
         self.title("Ranking - MyAnimeList.net")
         
+    def show_error_frame(self, error_msg):
+        if self.current_frame :
+            self.current_frame.destroy()
+            
+        self.current_frame = ErrorFrame(parent=self, error_txt=error_msg)
+        self.current_frame.pack(expand=True, fill="both")
         
+        self.title("Error")
         
+              
 ###########
 if __name__ == "__main__":
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):        

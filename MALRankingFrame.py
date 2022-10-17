@@ -17,7 +17,7 @@ from tkinter import font
 
 from PIL import Image, ImageTk
 
-from DbManager import DbManager
+from DbManager import SQLiteManager
 from FileManager import DIR_IMG_SEARCH, DIR_IMG_ICON
 from AllMangaFrame import AllMangaFrame
 
@@ -29,6 +29,9 @@ class MALRankingFrame(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent)
         self.config(bg="#2e51a2")
+        #configuration pour avoir une frame sans bordure
+        self.config(borderwidth=0)
+        self.config(highlightthickness=0)
         
         self.parent = parent
         
