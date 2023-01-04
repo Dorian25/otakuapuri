@@ -1,4 +1,4 @@
-![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Dorian25/get-mangas?include_prereleases) ![GitHub issues](https://img.shields.io/github/issues/Dorian25/get-mangas)
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Dorian25/get-mangas?include_prereleases) ![GitHub issues](https://img.shields.io/github/issues/Dorian25/get-mangas) [![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 
 <p align="center">
   <img width="500" height="300" src="https://media.giphy.com/media/IO2ICudgtBjby/giphy.gif"> 
@@ -42,8 +42,9 @@
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## Credits
-- Mangas are collected on [Sushi-Scan](https://sushiscan.su/)
+- Mangas are collected on [Sushi-Scan](https://sushiscan.ru/)
 - `requirements.txt` was generated with the library [pipreqs](https://github.com/bndr/pipreqs)
+- `.exe` was generated with the library [pyinstaller](https://github.com/pyinstaller/pyinstaller)
 
 ## Disclaimer
 :sparkling_heart: Please support the publishers and authors by purchasing their works :sparkling_heart: 
