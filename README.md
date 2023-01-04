@@ -21,9 +21,9 @@
 - :mag: **Search engine** - search your favorite manga (through more than 740 series available)
 - :inbox_tray: **Manga-Downloader** - download the whole volume or the last chapter in pdf 
 - :sound: **Mediaplayer** - listen to the cream of the crop of the most popular anime OST
-- :trophy: **The Top 100 best manga according [MyAnimeList](https://myanimelist.net/) - 
-- :question: Random manga - if you want to discover a new manga, you can choose one at random
-- :bar_chart: **Dashboard** - access multiple information about the sushi-scan website data [here](https://charts.mongodb.com/charts-getmanga-rhtkb/public/dashboards/632df18e-f274-4d69-899d-21740a3f593f)
+- :trophy: **Top 100** - best manga according to [MyAnimeList](https://myanimelist.net/)
+- :question: **Random manga** - if you want to discover a new manga, you can choose one at random
+- :bar_chart: **Dashboard** - access multiple information about the database [here](https://charts.mongodb.com/charts-getmanga-rhtkb/public/dashboards/632df18e-f274-4d69-899d-21740a3f593f)
 
 ## View Demo
 *gif video*
@@ -35,6 +35,7 @@
 | ------ | ------ |
 | img2pdf | https://gitlab.mister-muffin.de/josch/img2pdf |
 | mtTkinter | https://github.com/RedFantom/mtTkinter |
+| cloudscraper | https://github.com/VeNoMouS/cloudscraper |
 
 
 ## Contributing
