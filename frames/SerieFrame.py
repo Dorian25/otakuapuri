@@ -7,7 +7,7 @@ Created on Tue Jul 19 12:09:00 2022
 
 import webbrowser
 
-import mtTkinter as tk
+import utils.mtTkinter as tk
 from tkinter import ttk
 
 from tkinter import filedialog
@@ -17,8 +17,8 @@ from PIL import Image, ImageTk
 
 import threading
 
-from FileManager import FileManager, DIR_TMP_COVERS, DIR_IMG_ICON
-from utils import *
+from utils.FileManager import FileManager, DIR_TMP_COVERS, DIR_IMG_ICON
+from utils.utils import *
 
 class SerieFrame(tk.Frame):
     
@@ -140,14 +140,14 @@ class SerieFrame(tk.Frame):
         
         
         if len(self.serie_obj.volumes) > 0:
-            self.nav_bar.add(self.canvas_volumes, text="Volumes")
+            self.nav_bar.add(self.canvas_volumes, text="Volumes ("+ str(self.serie_obj.get_number_volumes()) +")")
             self.scrollbar_v.pack(side="right",fill="y")
             
             self.thread_download_covers = threading.Thread(target=self.show_covers)
             self.thread_download_covers.start()
             
         if len(self.serie_obj.chapitres) > 0:
-            self.nav_bar.add(self.canvas_chapitres, text="Chapitres")
+            self.nav_bar.add(self.canvas_chapitres, text="Chapitres ("+ str(self.serie_obj.get_number_chapitres()) +")")
             self.scrollbar_c.pack(side="right",fill="y")
             
             self.thread_show_chapters = threading.Thread(target=self.show_chapters)
@@ -179,10 +179,9 @@ class SerieFrame(tk.Frame):
             if pdf_path.endswith(".pdf"):
                 print(pdf_path)
                 
-                # optimiser cette recherche ?
-                url = [v for v in self.serie_obj.volumes if v["Numéro"] == event.widget.cget("text")][0]["URL"]
+                url_pages = self.serie_obj.volumes[event.widget.cget("text")]
                 
-                t1 = threading.Thread(target=self.download_volume, args=(url, pdf_path))
+                t1 = threading.Thread(target=self.download_volume, args=(url_pages, pdf_path))
                 t1.start()
             else :
                 messagebox.showerror("Error","Please specify a filename that ends with '.pdf'")
@@ -202,17 +201,16 @@ class SerieFrame(tk.Frame):
                 print(pdf_path)
                 
                 # optimiser cette recherche ?
-                url = [v for v in self.serie_obj.chapitres if v["Numéro"] == event.widget.cget("text")][0]["URL"]
+                url_pages = self.serie_obj.chapitres[event.widget.cget("text")]
                 
-                t1 = threading.Thread(target=self.download_volume, args=(url, pdf_path))
+                t1 = threading.Thread(target=self.download_volume, args=(url_pages, pdf_path))
                 t1.start()
             else :
                 messagebox.showerror("Error","Please specify a filename that ends with '.pdf'")
         else :
             self.button_back.config(state="normal")
         
-    def download_volume(self, url_volume, pdf_path):
-        url_pages = get_all_pages_url(url_volume)
+    def download_volume(self, url_pages, pdf_path):
         self.progressbar.config(maximum=len(url_pages))
         
         for num_page, url_img_page in enumerate(url_pages) :
@@ -249,8 +247,7 @@ class SerieFrame(tk.Frame):
         if n_row > 0:
             for i in range(n_row):
                 for j in range(n_col) :
-                    num_volume = self.serie_obj.chapitres[(i*n_col)+j]["Numéro"]
-                    url_volume = self.serie_obj.chapitres[(i*n_col)+j]["URL"]
+                    num_volume = self.serie_obj.get_list_numeros_chapitres()[(i*n_col)+j]
 
                     image = Image.open(DIR_IMG_ICON+'chapter_1.png')
                     image_resize = image.resize((120, 160))
@@ -274,8 +271,7 @@ class SerieFrame(tk.Frame):
                 
         if n_col_rest > 0 :
             for j in range(n_col_rest) :
-                num_volume = self.serie_obj.chapitres[(n_row*n_col)+j]["Numéro"]
-                url_volume = self.serie_obj.chapitres[(n_row*n_col)+j]["URL"]
+                num_volume = self.serie_obj.get_list_numeros_chapitres()[(n_row*n_col)+j]
                 
                 image = Image.open(DIR_IMG_ICON+'chapter_1.png')
                 image_resize = image.resize((120, 160))
@@ -310,13 +306,13 @@ class SerieFrame(tk.Frame):
         if n_row > 0:
             for i in range(n_row):
                 for j in range(n_col) :
-                    num_volume = self.serie_obj.volumes[(i*n_col)+j]["Numéro"]
-                    url_volume = self.serie_obj.volumes[(i*n_col)+j]["URL"]
-                    # get_cover_manga(title_manga, n_vol, url_manga, download_dir)
+                    num_volume = self.serie_obj.get_list_numeros_volumes()[(i*n_col)+j]
+                    url_cover = self.serie_obj.volumes[num_volume][0]
+                    # get_cover_manga(title_manga, n_vol, url_cover, download_dir)
                     cover_path = get_cover_manga(self.serie_obj.titre.lower().replace(" ","_"),
-                                                               num_volume, 
-                                                               url_volume, 
-                                                               DIR_TMP_COVERS)
+                                                num_volume,
+                                                url_cover, 
+                                                DIR_TMP_COVERS)
                     image = Image.open(cover_path)
                     image_resize = image.resize((120, 160))
                     tk_image = ImageTk.PhotoImage(image_resize)
@@ -339,12 +335,13 @@ class SerieFrame(tk.Frame):
                 
         if n_col_rest > 0 :
             for j in range(n_col_rest) :
-                num_volume = self.serie_obj.volumes[(n_row*n_col)+j]["Numéro"]
-                url_volume = self.serie_obj.volumes[(n_row*n_col)+j]["URL"]
+                num_volume = self.serie_obj.get_list_numeros_volumes()[(n_row*n_col)+j]
+                url_cover = self.serie_obj.volumes[num_volume][0]
+                # get_cover_manga(title_manga, n_vol, url_cover, download_dir)
                 cover_path = get_cover_manga(self.serie_obj.titre.lower().replace(" ","_"),
-                                                           num_volume, 
-                                                           url_volume, 
-                                                           DIR_TMP_COVERS)
+                                            num_volume,
+                                            url_cover, 
+                                            DIR_TMP_COVERS)
                 image = Image.open(cover_path)
                 image_resize = image.resize((120, 160))
                 tk_image = ImageTk.PhotoImage(image_resize)

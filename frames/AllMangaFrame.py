@@ -17,9 +17,9 @@ from tkinter import font
 
 from PIL import Image, ImageTk
 
-from DbManager import SQLiteManager
-from FileManager import DIR_DOC
-from utils import *
+from utils.DbManager import SQLiteManager
+from utils.FileManager import DIR_DOC
+from utils.utils import *
 
 import threading
 

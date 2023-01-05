@@ -15,10 +15,10 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 
-from DbManager import MongoDBManager
-from MediaPlayerFrame import MediaPlayerFrame
-from FileManager import DIR_IMG_SEARCH, DIR_IMG_ICON
-from CustomListBox import CustomListBox
+from utils.DbManager import MongoDBManager
+from frames.MediaPlayerFrame import MediaPlayerFrame
+from utils.FileManager import DIR_IMG_SEARCH, DIR_IMG_ICON
+from utils.CustomListBox import CustomListBox
 
 class SearchingFrame(tk.Frame):
     

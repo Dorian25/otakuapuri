@@ -17,9 +17,9 @@ from tkinter import font
 
 from PIL import Image, ImageTk
 
-from DbManager import SQLiteManager
-from FileManager import DIR_IMG_SEARCH, DIR_IMG_ICON
-from AllMangaFrame import AllMangaFrame
+from utils.DbManager import SQLiteManager
+from utils.FileManager import DIR_IMG_SEARCH, DIR_IMG_ICON
+from frames.AllMangaFrame import AllMangaFrame
 
 class MALRankingFrame(tk.Frame):
     

@@ -17,8 +17,8 @@ from PIL import Image, ImageTk
 import pygame
 import time
 
-from FileManager import FileManager, DIR_IMG_LOAD, DIR_MUSIC_LOAD
-from utils import *
+from utils.FileManager import FileManager, DIR_IMG_LOAD, DIR_MUSIC_LOAD
+from utils.utils import *
 
 class LoadingFrame(tk.Frame):
     DEFAULT_MAX_VAL_PB = 60

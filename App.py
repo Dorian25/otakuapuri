@@ -7,17 +7,19 @@ Created on Mon Jul 18 21:20:08 2022
 
 import os, sys
 import random
-import mtTkinter as tk
+
 import pygame
 
-from LoadingFrame import LoadingFrame
-from ErrorFrame import ErrorFrame
-from SearchingFrame import SearchingFrame
-from SerieFrame import SerieFrame
-from MALRankingFrame import MALRankingFrame
-from DbManager import MongoDBManager
-from FileManager import FileManager, DIR_IMG_ICON
-from utils import *
+from frames.LoadingFrame import LoadingFrame
+from frames.ErrorFrame import ErrorFrame
+from frames.SearchingFrame import SearchingFrame
+from frames.SerieFrame import SerieFrame
+from frames.MALRankingFrame import MALRankingFrame
+
+import utils.mtTkinter as tk
+from utils.DbManager import MongoDBManager
+from utils.FileManager import FileManager, DIR_IMG_ICON
+from utils.utils import *
 
 class App(tk.Tk):
     
@@ -45,7 +47,7 @@ class App(tk.Tk):
         if test_internet():
             self.show_loading_frame(random.choice(quotes_anime))
         else :
-            self.show_error_frame("internet")
+            self.show_error_frame("No Internet")
     
     def show_searching_frame(self):
         if self.current_frame :
@@ -72,10 +74,7 @@ class App(tk.Tk):
         self.current_frame = SerieFrame(parent=self, serie_obj=serie)
         self.current_frame.pack(expand=True, fill="both")
         
-        self.title(self.current_frame.serie_obj.titre + 
-                   " - " + 
-                   str(len(self.current_frame.serie_obj.volumes)) + 
-                   " volumes are available !")
+        self.title(self.current_frame.serie_obj.titre)
         
     def show_malranking_frame(self):
         if self.current_frame :
@@ -105,8 +104,11 @@ if __name__ == "__main__":
         #create tmp directories
         os.makedirs(os.path.join("tmp", "pages"))
         os.makedirs(os.path.join("tmp", "covers"))
-        
+
+    FileManager().create_tmp_folders()
+
     app = App()
     app.mainloop()
+
     FileManager().delete_tmp_files()
     pygame.quit()

@@ -9,9 +9,6 @@
 ## Table of content
 - [Features](#features)
 - [View Demo](#view-demo)
-- [Tutorials](#tutorials)
-  - [Run the app](#run-the-app)
-  - [Run the code](#run-the-code)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Disclaimer](#disclaimer)
@@ -26,7 +23,10 @@
 - :bar_chart: **Dashboard** - access multiple information about the database [here](https://charts.mongodb.com/charts-getmanga-rhtkb/public/dashboards/632df18e-f274-4d69-899d-21740a3f593f)
 
 ## View Demo
-*gif video*
+<p align="center">
+  <img width="500" height="300" src="https://user-images.githubusercontent.com/32178615/210775305-f340d8fa-e311-4b30-8877-6c1f2dfaead2.gif"> 
+</p>
+<p align="center">A little demo </p>
 
 ## Tutorials
 

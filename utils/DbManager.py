@@ -8,7 +8,7 @@ Created on Mon Jul 18 22:54:46 2022
 import sqlite3
 import json
 import requests
-from Serie import Serie
+from utils.Serie import Serie
 
 class MongoDBManager:
     def __init__(self):
@@ -63,7 +63,7 @@ class MongoDBManager:
             return [doc["Titre"] for doc in json_response["documents"]]
         except:
             print("erreur")
-            return False
+            return []
                 
 ###
 

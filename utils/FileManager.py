@@ -22,8 +22,20 @@ DIR_TMP_PAGES = "tmp/pages/"
 class FileManager():
     def __init__(self):
         pass
-        
-        
+
+    def create_tmp_folders(self):
+        try:
+            os.makedirs(DIR_TMP_PAGES, exist_ok = True)
+            print("Directory '%s' created successfully" % DIR_TMP_PAGES)
+        except OSError as error:
+            print("Directory '%s' can not be created" % DIR_TMP_PAGES)
+
+        try:
+            os.makedirs(DIR_TMP_COVERS, exist_ok = True)
+            print("Directory '%s' created successfully" % DIR_TMP_COVERS)
+        except OSError as error:
+            print("Directory '%s' can not be created" % DIR_TMP_COVERS)
+
     def delete_tmp_files(self):
         list_covers = os.listdir(DIR_TMP_COVERS)
         list_pages = os.listdir(DIR_TMP_PAGES)

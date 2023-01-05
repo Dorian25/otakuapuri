@@ -18,7 +18,7 @@ from PIL import Image, ImageTk
 import datetime
 from time import strftime
 
-from FileManager import DIR_MUSIC_PLAYLIST, DIR_IMG_MP3, DIR_IMG_ICON
+from utils.FileManager import DIR_MUSIC_PLAYLIST, DIR_IMG_MP3, DIR_IMG_ICON
 
 
 class MediaPlayerFrame(tk.Frame):
