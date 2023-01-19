@@ -39,8 +39,6 @@ class SearchingFrame(tk.Frame):
         self.config(borderwidth=0)
         self.config(highlightthickness=0)
         
-        self.mongodb_manager = MongoDBManager()
-        
         # Images
         list_bg_img = os.listdir(DIR_IMG_SEARCH)
         self.bg_img = ImageTk.PhotoImage(Image.open(DIR_IMG_SEARCH + 
@@ -117,11 +115,14 @@ class SearchingFrame(tk.Frame):
             self.set_placeholder()
             
     def redirect_malranking_frame(self, event):
+        pygame.quit()
         self.parent.show_malranking_frame()
+
         
     def redirect_random_serie(self, event):
+        pygame.quit()
         random_serie = random.choice(self.parent.series_available)
-        serie_obj = self.mongodb_manager.get_serie_infos(random_serie)
+        serie_obj = MongoDBManager.get_serie_infos(random_serie)
         
         self.parent.show_serie_frame(serie_obj)
         
@@ -139,11 +140,12 @@ class SearchingFrame(tk.Frame):
 
         
     def redirect_serie_frame(self, event):
+        pygame.quit()
         selection = event.widget.curselection()
         if selection:
             index = selection[0]
             titre_serie = event.widget.get(index)
-            serie_obj = self.mongodb_manager.get_serie_infos(titre_serie)
+            serie_obj = MongoDBManager.get_serie_infos(titre_serie)
          
             self.parent.show_serie_frame(serie_obj)
         else:

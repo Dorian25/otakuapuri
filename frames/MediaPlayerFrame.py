@@ -82,11 +82,9 @@ class MediaPlayerFrame(tk.Frame):
         self.button_play.pack(side=tk.LEFT)
         self.button_next.pack(side=tk.LEFT)
            
-    def play_song(self) :
-        # Init pygame mixer
+    def play_song(self):
         pygame.init()
         pygame.mixer.init()
-        
         if self.var_status_mp.get() == "play" :
             pygame.mixer.music.pause()
             self.var_status_mp.set("pause")

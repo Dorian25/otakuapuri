@@ -74,7 +74,6 @@ class LoadingFrame(tk.Frame):
 
         
     def animate(self):
-        # Init pygame mixer
         pygame.init()
         pygame.mixer.init()
         # Load and play sea sound
@@ -82,26 +81,18 @@ class LoadingFrame(tk.Frame):
         pygame.mixer.music.load(DIR_MUSIC_LOAD+random.choice(list_musics))
         #pygame.mixer.music.play(-1) #music repeats indefinitely
         pygame.mixer.music.play()
-        
-        try :
-            if test_internet():
                 
-                self.default_animation()
+        self.animate_progressbar()
 
-                pygame.quit()
+        pygame.quit()
                 
-                self.parent.show_searching_frame()    
-            else:
-                #show error frame
-                self.parent.show_error_frame("internet")
-        except ConnectionError:
-            messagebox.showerror("Show error frame", "Please activate your connection !")
+        self.parent.show_searching_frame()    
         
     
-    def default_animation(self):
+    def animate_progressbar(self):
         # animation de chargement
         for i in range(1,self.DEFAULT_MAX_VAL_PB+1):
             self.progressbar["value"] = i
             #self.canvas.itemconfig(self.progressbar_txt, text="{:.1f}%".format(100 * i/self.DEFAULT_MAX_VAL_PB))
             self.update()
-            time.sleep(0.1)
+            time.sleep(0.1)         

@@ -13,8 +13,6 @@ from tkinter import messagebox
 from tkinter import font
 
 from PIL import Image, ImageTk
-import pygame
-import time
 
 from utils.FileManager import FileManager, DIR_IMG_LOAD, DIR_MUSIC_LOAD
 from utils.utils import *
@@ -58,7 +56,7 @@ class ErrorFrame(tk.Frame):
                                                       "Veuillez vérifier votre connexion internet et réessayer.")
         
         self.retry_button = ttk.Button(self, text = "Retry", command = self.retry)
-        self.canvas.create_window(10, 10, window=self.retry_button)
+        self.canvas.create_window(520, 300, window=self.retry_button)
         
     def retry(self):
         self.parent.show_loading_frame(random.choice(quotes_anime))

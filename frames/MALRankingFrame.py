@@ -5,19 +5,12 @@ Created on Tue Jul 26 12:44:24 2022
 @author: Dorian
 """
 
-import os
-import random
 
 import tkinter as tk
 from tkinter import ttk
 
-from tkinter import filedialog
-from tkinter import messagebox
-from tkinter import font
-
 from PIL import Image, ImageTk
 
-from utils.DbManager import SQLiteManager
 from utils.FileManager import DIR_IMG_SEARCH, DIR_IMG_ICON
 from frames.AllMangaFrame import AllMangaFrame
 
@@ -34,7 +27,7 @@ class MALRankingFrame(tk.Frame):
         self.config(highlightthickness=0)
         
         self.parent = parent
-        
+        self.covers_img = []
         
         self.nav_bar = ttk.Notebook(self)
         
@@ -46,32 +39,27 @@ class MALRankingFrame(tk.Frame):
         self.nav_bar.add(self.tab2, text="Top Manga")
         self.nav_bar.add(self.tab3, text="Most Popular")
         
+        image = Image.open("images\icons\icon_left.png")
+        tk_image_button = ImageTk.PhotoImage(image)
+        self.covers_img.append(tk_image_button)
+        self.button_back = tk.Button(self,
+                                    background="#333333",
+                                    image= tk_image_button, 
+                                    command=self.return_searching_frame,
+                                    borderwidth=0)
         
-        
-        self.back_button = tk.Button(self, 
-                                     text="Back", 
-                                     bd=0,
-                                     highlightthickness=0,
-                                     relief='ridge',
-                                     command=self.return_searching_frame)
-        
-        self.back_button.pack(side="top")
+        self.button_back.pack(side="left", fill="y")
         self.nav_bar.pack(side="top", expand=True, fill="both", padx=30, pady=30)
         
         
     def return_searching_frame(self):
         # delete all covers in tmp dir
-        self.parent.show_searching_frame(None)
+        self.parent.show_searching_frame()
        
         
         """
         self.top100 = self.get_top100()
-        
-        
-        
-        
-        
-        
+
         self.treeview = ttk.Treeview(root, 
                                      columns=self.COLUMNS,
                                      show='headings')

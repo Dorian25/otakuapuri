@@ -5,17 +5,16 @@ Created on Mon Jul 18 21:20:08 2022
 @author: Dorian
 """
 
-import os, sys
+import os 
+import sys
 import random
-
+from dotenv import load_dotenv
 import pygame
-
 from frames.LoadingFrame import LoadingFrame
 from frames.ErrorFrame import ErrorFrame
 from frames.SearchingFrame import SearchingFrame
 from frames.SerieFrame import SerieFrame
 from frames.MALRankingFrame import MALRankingFrame
-
 import utils.mtTkinter as tk
 from utils.DbManager import MongoDBManager
 from utils.FileManager import FileManager, DIR_IMG_ICON
@@ -40,25 +39,34 @@ class App(tk.Tk):
         self.iconbitmap(DIR_IMG_ICON + 'icon.ico')
         self.title('Get-Mangas !')
         
-        self.series_available = MongoDBManager().get_all_series()
+        self.series_available = []
         
         self.current_frame = None
         
-        if test_internet():
-            self.show_loading_frame(random.choice(quotes_anime))
-        else :
-            self.show_error_frame("No Internet")
-    
+        self.show_loading_frame(random.choice(quotes_anime))
+
     def show_searching_frame(self):
+        """Show the SearchingFrame
+        """
+
         if self.current_frame :
             self.current_frame.destroy()
         
         self.current_frame = SearchingFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
+
+        if len(self.series_available) == 0:
+            self.series_available = MongoDBManager.get_all_series()
         
         self.title("Get-Mangas ! ["+str(len(self.series_available))+" series available]")
         
     def show_loading_frame(self, quote):
+        """Show the LoadingFrame
+
+        Args:
+            quote (str): a quote 
+        """
+
         if self.current_frame :
             self.current_frame.destroy()
             
@@ -68,6 +76,12 @@ class App(tk.Tk):
         self.current_frame.animate()
              
     def show_serie_frame(self, serie):
+        """_summary_
+
+        Args:
+            serie (_type_): _description_
+        """
+
         if self.current_frame :
             self.current_frame.destroy()
             
@@ -77,15 +91,24 @@ class App(tk.Tk):
         self.title(self.current_frame.serie_obj.titre)
         
     def show_malranking_frame(self):
+        """_summary_
+        """
+
         if self.current_frame :
             self.current_frame.destroy()
         
         self.current_frame = MALRankingFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
         
-        self.title("Ranking - MyAnimeList.net")
+        self.title("Top Manga - MyAnimeList.net")
         
     def show_error_frame(self, error_msg):
+        """_summary_
+
+        Args:
+            error_msg (_type_): _description_
+        """
+
         if self.current_frame :
             self.current_frame.destroy()
             
@@ -96,19 +119,28 @@ class App(tk.Tk):
         
               
 ###########
+
+# TODO : revoir la gestion du pygame pour la musique etc...
+# TODO : revoir la gestion du message d'erreur internet (position du bouton relancer showloading et showsearching)
+# TODO : revoir la recherche via  MAL (score doit être minimum de 10 sinon ce n'est pas le bon résultat)
+# TODO : revoir la pipeline ETL pour MAL pour inclure les stats
+# TODO : revoir les séries qui n'ont pas VOLUMES ou CHAPITRES 
+# TODO : revoir l'aspect graphique de l'application
+# TODO : revoir l'onglet Stats 
+# TODO : essayer d'avoir des onglets de couleurs différentes
+
+
 if __name__ == "__main__":
+    load_dotenv()
+
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):        
     	# sys._MEIPASS = C:\Users\xxxx\AppData\Local\Temp\_MEIxxxxxx
         os.chdir(sys._MEIPASS)
+
+    FileManager.create_tmp_folders()
     
-        #create tmp directories
-        os.makedirs(os.path.join("tmp", "pages"))
-        os.makedirs(os.path.join("tmp", "covers"))
-
-    FileManager().create_tmp_folders()
-
     app = App()
     app.mainloop()
-
-    FileManager().delete_tmp_files()
+    
+    FileManager.delete_tmp_files()
     pygame.quit()

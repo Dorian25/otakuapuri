@@ -9,17 +9,106 @@ import sqlite3
 import json
 import requests
 from utils.Serie import Serie
+import os
 
-class MongoDBManager:
-    def __init__(self):
-        self.url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
-        self.API_KEY = 'o8pywKI0RGODzcJiMIG7gvKehnmjAo5zIlN6uJGSlVOiRddZfptPIYtjF0d6Ka8n'
-        self.headers = {'Content-Type': 'application/json',
+class MongoDBManager(object):
+    # https://stackoverflow.com/questions/30556857/creating-a-static-class-with-no-instances
+    @staticmethod
+    def search_in_mal(title_serie):
+        url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
+        headers = {'Content-Type': 'application/json',
                         'Access-Control-Request-Headers': '*',
-                        'api-key': self.API_KEY,
+                        'api-key': os.getenv('API_KEY'),
         }
-    
-    def get_serie_infos(self, titre_serie):
+
+        action = "aggregate"
+        result = None
+        
+        payload = json.dumps({"collection": "mal",
+                              "database": "getmanga_db",
+                              "dataSource": "GetMangaCluster",
+                              "pipeline": [
+                                            {
+                                                "$search": {
+                                                    "index": "title",
+                                                    "text": {
+                                                        "query": title_serie,
+                                                        "path": {
+                                                            "wildcard": "*"
+                                                            }
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "$limit": 3
+                                            }
+                                            #,
+                                            #{
+                                            #    "$project": {
+                                            #        "score": { "$meta": "searchScore" }
+                                            #    }
+                                            #}
+                                ]
+                              })
+
+
+        try:
+            response = requests.request("POST", url+action, headers=headers, data=payload)
+            response_json = response.json()
+            
+            result = response_json['documents'][0] if len(response_json['documents']) > 0 else None
+        except Exception as e:
+            print("erreur", e)
+            return result
+        finally:
+            return result
+
+    @staticmethod
+    def search_in_sushiscan(title_serie):
+        url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
+        headers = {'Content-Type': 'application/json',
+                        'Access-Control-Request-Headers': '*',
+                        'api-key': os.getenv('API_KEY'),
+        }
+        action = "findOne"
+        result = None
+        
+        payload = json.dumps({"collection": "sushiscan",
+                              "database": "getmanga_db",
+                              "dataSource": "GetMangaCluster",
+                              "pipeline": [
+                                            {
+                                                "$search": {
+                                                    "index": "title",
+                                                    "text": {
+                                                        "query": title_serie,
+                                                        "path": {
+                                                            "wildcard": "*"
+                                                            }
+                                                    }
+                                                }
+                                            }
+                                ]
+                              })
+
+
+        try:
+            response = requests.request("POST", url+action, headers=headers, data=payload)
+            response_json = response.json()
+            
+        except Exception as e:
+            print("erreur", e)
+            return response_json
+        finally:
+            return response_json
+
+    @staticmethod
+    def get_serie_infos(titre_serie):
+        url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
+        headers = {'Content-Type': 'application/json',
+                        'Access-Control-Request-Headers': '*',
+                        'api-key': os.getenv('API_KEY'),
+        }
         action = "findOne"
         serie = None
         
@@ -32,17 +121,23 @@ class MongoDBManager:
 
 
         try:
-            response = requests.request("POST", self.url+action, headers=self.headers, data=payload)
+            response = requests.request("POST", url+action, headers=headers, data=payload)
             response_json = response.json()
-            serie = Serie(response_json["document"])
+            mal_info = MongoDBManager.search_in_mal(titre_serie)
+            serie = Serie(response_json["document"], mal_info)
         except Exception as e:
             print("erreur", e)
-            return serie
+            return None
         finally:
             return serie
             
-        
-    def get_all_series(self):
+    @staticmethod   
+    def get_all_series():
+        url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
+        headers = {'Content-Type': 'application/json',
+                        'Access-Control-Request-Headers': '*',
+                        'api-key': os.getenv('API_KEY'),
+        }
         action = "find"
         
         payload = json.dumps({
@@ -57,7 +152,7 @@ class MongoDBManager:
 
 
         try:
-            response = requests.request("POST", self.url+action, headers=self.headers, data=payload)
+            response = requests.request("POST", url+action, headers=headers, data=payload)
             json_response = response.json()
           
             return [doc["Titre"] for doc in json_response["documents"]]
