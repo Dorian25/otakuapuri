@@ -1,4 +1,4 @@
-[![Generic badge](https://img.shields.io/badge/status-not_working-red.svg)](https://shields.io/) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Dorian25/get-mangas?include_prereleases) ![GitHub issues](https://img.shields.io/github/issues/Dorian25/get-mangas) [![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)]([https://github.com/Naereen/StrapDown.js/blob/master/LICENSE](https://github.com/Dorian25/get-mangas/blob/master/LICENSE))
+[![Generic badge](https://img.shields.io/badge/status-working-green.svg)](https://shields.io/) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Dorian25/get-mangas?include_prereleases) ![GitHub issues](https://img.shields.io/github/issues/Dorian25/get-mangas) [![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)]([https://github.com/Naereen/StrapDown.js/blob/master/LICENSE](https://github.com/Dorian25/get-mangas/blob/master/LICENSE))
 
 <p align="center">
   <img width="600" height="400" src="https://media.giphy.com/media/IO2ICudgtBjby/giphy.gif"> 
@@ -20,7 +20,7 @@
 <p align="center">A small demo to show how the software works ツ</p>
 
 ## Features
-- :mag: **Search engine** - search your favorite manga (through more than 740 series available)
+- :mag: **Search engine** - search your favorite manga (through more than 800 series available)
 - :inbox_tray: **Manga-Downloader** - download the whole volume or the last chapter in pdf 
 - :sound: **Mediaplayer** - listen to the cream of the crop of the most popular anime OST
 - :trophy: **Top 100** - best manga according to [MyAnimeList](https://myanimelist.net/)
@@ -38,7 +38,7 @@
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## Credits
-- Mangas are collected on [Sushi-Scan](https://sushiscan.ru/)
+- Mangas are collected on [Sushi-Scan](https://sushiscan.net/)
 - `requirements.txt` was generated with the library [pipreqs](https://github.com/bndr/pipreqs)
 - `.exe` was generated with the library [pyinstaller](https://github.com/pyinstaller/pyinstaller)
 
