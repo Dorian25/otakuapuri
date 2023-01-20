@@ -6,7 +6,7 @@ added_files = [
          ('docs', 'docs' ),
          ('images', 'images' ),
          ('musics', 'musics' ),
-         ('test.db','.')
+         ('.env','.')
          ]
 
 a = Analysis(
@@ -40,7 +40,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,
+    console=False,
     icon='images/icons/icon.ico',
     disable_windowed_traceback=False,
     argv_emulation=False,

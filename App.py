@@ -8,6 +8,7 @@ Created on Mon Jul 18 21:20:08 2022
 import os 
 import sys
 import random
+import threading
 from dotenv import load_dotenv
 import pygame
 from frames.LoadingFrame import LoadingFrame
@@ -45,6 +46,9 @@ class App(tk.Tk):
         
         self.show_loading_frame(random.choice(quotes_anime))
 
+    def set_series_available(self):
+        self.series_available = MongoDBManager.get_all_series()
+
     def show_searching_frame(self):
         """Show the SearchingFrame
         """
@@ -54,9 +58,6 @@ class App(tk.Tk):
         
         self.current_frame = SearchingFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
-
-        if len(self.series_available) == 0:
-            self.series_available = MongoDBManager.get_all_series()
         
         self.title("Get-Mangas ! ["+str(len(self.series_available))+" series available]")
         
@@ -73,6 +74,10 @@ class App(tk.Tk):
         self.current_frame = LoadingFrame(parent=self, quote_txt=quote)
         self.current_frame.pack(expand=True, fill="both")
         
+        if len(self.series_available) == 0:
+            thread = threading.Thread(target=self.set_series_available, daemon=True)
+            thread.start()
+
         self.current_frame.animate()
              
     def show_serie_frame(self, serie):
@@ -131,11 +136,13 @@ class App(tk.Tk):
 
 
 if __name__ == "__main__":
-    load_dotenv()
-
+    extDataDir = os.getcwd()
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):        
     	# sys._MEIPASS = C:\Users\xxxx\AppData\Local\Temp\_MEIxxxxxx
         os.chdir(sys._MEIPASS)
+        extDataDir = sys._MEIPASS
+    # https://github.com/pyinstaller/pyinstaller/issues/5522#issuecomment-770858489
+    load_dotenv(dotenv_path=os.path.join(extDataDir, '.env'))
 
     FileManager.create_tmp_folders()
     
