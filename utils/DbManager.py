@@ -123,7 +123,8 @@ class MongoDBManager(object):
         try:
             response = requests.request("POST", url+action, headers=headers, data=payload)
             response_json = response.json()
-            mal_info = MongoDBManager.search_in_mal(titre_serie)
+            print(titre_serie.split(" – ")[0])
+            mal_info = MongoDBManager.search_in_mal(titre_serie.split(" – ")[0])
             serie = Serie(response_json["document"], mal_info)
         except Exception as e:
             print("erreur", e)
