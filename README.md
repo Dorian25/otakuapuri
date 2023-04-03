@@ -47,6 +47,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 ## Credits
 - Mangas are collected on [Sushi-Scan](https://sushiscan.net/)
+- Anime are collected on [Anime-Sama](https://anime-sama.fr/)
 - `requirements.txt` was generated with the library [pipreqs](https://github.com/bndr/pipreqs)
 - `.exe` was generated with the library [pyinstaller](https://github.com/pyinstaller/pyinstaller)
 
