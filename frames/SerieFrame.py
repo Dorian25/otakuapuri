@@ -13,6 +13,8 @@ from tkinter import ttk
 from frames.DetailsTabFrame import DetailsTabFrame
 from frames.ScrollableFrame import ScrollableFrame
 from frames.StatsFrame import StatsFrame
+from frames.InfoFrame import InfoFrame
+from frames.VideoPlayerFrame import VideoPlayerFrame
 
 from tkinter import filedialog
 from tkinter import messagebox
@@ -26,7 +28,8 @@ from utils.FileManager import FileManager, DIR_TMP_COVERS, DIR_TMP_PAGES, DIR_TM
 from utils.utils import *
 
 class SerieFrame(tk.Frame):
-    
+    # TODO : Afficher la barre de chargement uniquement quand on télécharge
+    # TODO : Lecteur de manga intégré avoir à télécharger
     font_label_frame_details = ("Verdana",12)
     font_label_frame_info = ("Verdana", 12)
     
@@ -39,23 +42,47 @@ class SerieFrame(tk.Frame):
         self.config(highlightthickness=0)
 
         # style
-        s = ttk.Style()
-        s.theme_use("default")
-        s.configure("red.Horizontal.TProgressbar", 
-                    thickness=10,
-                    background='#cf2410')
-        s.configure("TNotebook",
-                    background="#1e1e1e",
-                    borderwidth=0)
+        self.s = ttk.Style()
+        self.s.theme_use("default")
+        #TODO add text inside progressbar https://stackoverflow.com/questions/24768090/progressbar-in-tkinter-with-a-label-inside
 
-        s.configure('TNotebook.Tab',
-                    padding= [10, 10],
-                    font=("Verdana", 12),
-                    background= "#333333",
-                    foreground= "white")
-        s.map("TNotebook.Tab",
-                background=[("selected", "#1e1e1e")],
-                font=[("selected", ("Verdana", 12, "bold"))])
+        # change the text of the progressbar, 
+        # the trailing spaces are here to properly center the text
+        self.s.configure("red.Horizontal.TProgressbar", text="Ready !", foreground="white")
+        self.s.configure("red.Horizontal.TProgressbar", 
+                    thickness=20,
+                    background='#cf2410')
+        # add the label to the progressbar style
+        self.s.layout("red.Horizontal.TProgressbar",
+                        [('red.Horizontal.TProgressbar.trough',
+                        {'children': [('red.Horizontal.TProgressbar.pbar',
+                                        {'side': 'left', 'sticky': 'ns'}),
+                                        ("red.Horizontal.TProgressbar.label",   # label inside the bar
+                                        {"sticky": ""})],
+                        'sticky': 'nswe'})])
+        # remove_arrow: https://stackoverflow.com/questions/48698283/can-you-remove-arrows-on-tkinter-scrollbar-widget-in-python
+        self.s.layout('Vertical.TScrollbar', 
+                        [('Vertical.Scrollbar.trough',
+                        {'children': [('Vertical.Scrollbar.thumb', 
+                                    {'expand': '1', 'sticky': 'nswe'})],
+                        'sticky': 'ns'})])
+        self.s.configure("Vertical.TScrollbar", 
+                         troughcolor="#1e1e1e",
+                         background="#333333",
+                         bordercolor="#1e1e1e")
+
+        self.s.configure("TNotebook",
+                         background="#252526",
+                         borderwidth=0)
+
+        self.s.configure('TNotebook.Tab',
+                         padding= [10, 10],
+                         font=("Verdana", 12),
+                         background= "#333333",
+                         foreground= "white")
+        self.s.map("TNotebook.Tab",
+                   background=[("selected", "#1e1e1e")],
+                   font=[("selected", ("Verdana", 12, "bold"))])
         
         # variables
         self.serie_obj = serie_obj
@@ -64,22 +91,24 @@ class SerieFrame(tk.Frame):
 
         # Widgets
         self.nav_bar = ttk.Notebook(self)
+        self.nav_bar.bind('<<NotebookTabChanged>>', self.onChangeTab)
 
         self.frame_info = tk.Frame(self, borderwidth=0, width=30, background="#252526")
         self.label_statut = tk.Label(self.frame_info, text=serie_obj.statut, font=self.font_label_frame_info)
-        if serie_obj.statut == "Terminé":
+        if serie_obj.statut == "Terminé" or serie_obj.statut == "Completed":
             self.label_statut.config(bg="#32d74b")
-        elif serie_obj.statut == "En Cours":
+        elif serie_obj.statut == "En Cours" or serie_obj.statut == "Ongoing":
             self.label_statut.config(bg="#ff9f0a")
         elif serie_obj.statut == "Abandonné":
             self.label_statut.config(bg="#ff375f")
         elif serie_obj.statut == "En Pause":
             self.label_statut.config(bg="#98989d")
-        self.label_type = tk.Label(self.frame_info, text=serie_obj.type_serie, font=self.font_label_frame_info)
-        self.label_annee = tk.Label(self.frame_info, text=serie_obj.annee_sortie, font=self.font_label_frame_info)
-        self.label_auteur = tk.Label(self.frame_info, text=serie_obj.auteur, font=self.font_label_frame_info, wraplength=200)
+        self.info_type = InfoFrame(self.frame_info, key="Type", value=serie_obj.type)
+        self.info_annee = InfoFrame(self.frame_info, key="Year of release", value=serie_obj.annee_sortie)
+        self.info_auteur = InfoFrame(self.frame_info, key="Author", value=serie_obj.auteur)
+        self.info_dessinateur = InfoFrame(self.frame_info, key="Drawer", value=serie_obj.dessinateur)
         
-        image = Image.open("images\icons\icon_left.png")
+        image = Image.open(DIR_IMG_ICON + "icon_left.png")
         tk_image_button = ImageTk.PhotoImage(image)
         self.covers_img.append(tk_image_button)
         self.button_back = tk.Button(self,
@@ -101,21 +130,16 @@ class SerieFrame(tk.Frame):
                                     bg="#1e1e1e",
                                     font=self.font_label_frame_details,
                                     wraplength=700)
-        
+        self.nav_bar.add(self.frame_resume, text="Details")
+
         self.progressbar = ttk.Progressbar(self, 
                                            style="red.Horizontal.TProgressbar",
                                            orient="horizontal",
                                            mode="determinate", 
                                            value=0)
         
-        # VOLUMES
-        self.frame_volumes = ScrollableFrame(self)
-        # CHAPITRES
-        self.frame_chapitres = ScrollableFrame(self)
-        # CHARACTERS 
-        self.frame_characters = ScrollableFrame(self)
+        self.frame_anime = None
         
-        self.nav_bar.add(self.frame_resume, text="Details")
         '''
         if self.serie_obj.statistics:
             # STATISTICS
@@ -133,9 +157,10 @@ class SerieFrame(tk.Frame):
         self.frame_info.pack(side="left", fill="y")
         
         self.label_statut.pack(side="bottom", fill="x", padx=5, pady=5)
-        self.label_type.pack(side="bottom", fill="x", padx=5, pady=5 )
-        self.label_annee.pack(side="bottom", fill="x", padx=5, pady=5)
-        self.label_auteur.pack(side="bottom", fill="x", padx=5, pady=5)
+        self.info_type.pack(side="bottom", fill="x", padx=5)
+        self.info_annee.pack(side="bottom", fill="x", padx=5)
+        self.info_dessinateur.pack(side="bottom", fill="x", padx=5)
+        self.info_auteur.pack(side="bottom", fill="x", padx=5)
             
         self.progressbar.pack(side="bottom", fill="x")
         self.nav_bar.pack(side="right", fill="both", expand=True)
@@ -146,29 +171,60 @@ class SerieFrame(tk.Frame):
         self.thread_dl_cover = threading.Thread(target=self.download_cover_serie, daemon=True)
         self.thread_dl_cover.start()
 
-        if len(self.serie_obj.volumes) > 0:
-            self.nav_bar.add(self.frame_volumes, text="Volumes ("+ str(self.serie_obj.get_number_volumes()) +")")
+        if self.serie_obj.get_number_volumes() > 0:
+            frame_volumes = ScrollableFrame(self.nav_bar,
+                                            DIR_IMG_ICON+'cover_manga.png',
+                                            self.onClickVolume,
+                                            self.serie_obj.get_list_numeros_volumes())
+
+            self.nav_bar.add(frame_volumes, text="Volumes ("+ str(self.serie_obj.get_number_volumes()) +")")
             
-            self.thread_download_covers = threading.Thread(target=self.show_covers, daemon=True)
-            self.thread_download_covers.start()
+            self.thread_show_volumes = threading.Thread(target=frame_volumes.show_elements,daemon=True)
+            self.thread_show_volumes.start()
             
-        if len(self.serie_obj.chapitres) > 0:
-            self.nav_bar.add(self.frame_chapitres, text="Chapitres ("+ str(self.serie_obj.get_number_chapitres()) +")")
+        if self.serie_obj.get_number_chapitres() > 0:
+            frame_chapters = ScrollableFrame(self.nav_bar, 
+                                            DIR_IMG_ICON+'cover_chapitre.png',
+                                            self.onClickChapter,
+                                            self.serie_obj.get_list_numeros_chapitres())
+
+            self.nav_bar.add(frame_chapters, text="Chapitres ("+ str(self.serie_obj.get_number_chapitres()) +")")
             
-            self.thread_show_chapters = threading.Thread(target=self.show_chapters, daemon=True)
+            self.thread_show_chapters = threading.Thread(target=frame_chapters.show_elements,daemon=True)
             self.thread_show_chapters.start()
 
         if len(self.serie_obj.characters) > 0:
-            self.nav_bar.add(self.frame_characters, text="Personnages")
+            characters = self.serie_obj.get_top20_characters()
+            frame_characters = ScrollableFrame(self.nav_bar, type_filter="advanced", elements=characters)
 
-            self.thread_dl_char = threading.Thread(target=self.download_characters_img, daemon=True)
-            self.thread_dl_char.start()  
+            self.nav_bar.add(frame_characters, text="Personnages")
+
+            self.thread_dl_char = threading.Thread(target=self.download_characters_img, args=(frame_characters, characters), daemon=True)
+            self.thread_dl_char.start()
+
+        if self.serie_obj.get_number_versions() > 0:
+            self.frame_anime = VideoPlayerFrame(self.nav_bar,
+                                                vf=self.serie_obj.seasons_vf, 
+                                                vo=self.serie_obj.seasons_vostfr, 
+                                                app=self.parent,
+                                                serieframe=self,
+                                                p_bar=self.progressbar)        
+            
+            self.nav_bar.add(self.frame_anime, text="Anime")
+
+    def onChangeTab(self, event):
+        if self.frame_anime:
+            if self.frame_anime.is_playing():
+                self.frame_anime.pause()
 
     def return_searching_frame(self):
         # delete all covers in tmp dir
         #if self.thread_download_covers.is_alive():
             # kill thread
-            
+        #TODO : penser à kill le vlc si l'anime est en cours - appel à la fonction exit()
+        if self.frame_anime:
+            self.frame_anime.exit()
+
         self.parent.show_searching_frame()
         FileManager().delete_tmp_files()
         
@@ -180,10 +236,11 @@ class SerieFrame(tk.Frame):
                 
                 pdf_path = filedialog.asksaveasfilename(title="Where do you want to save the volume ?",
                                                         filetypes=[("Pdf files",".pdf")],
+                                                        initialfile="volume_" + event.widget.cget("text"),
                                                         defaultextension='.pdf')
                 
                 if pdf_path.endswith(".pdf"):
-                    print(pdf_path)
+                    self.show_progressbar()
                     
                     url_pages = self.serie_obj.volumes[event.widget.cget("text")]
                     
@@ -204,10 +261,11 @@ class SerieFrame(tk.Frame):
                 
                 pdf_path = filedialog.asksaveasfilename(title="Where do you want to save the chapter ?",
                                                         filetypes=[("Pdf files",".pdf")],
+                                                        initialfile="chapter_" + event.widget.cget("text"),
                                                         defaultextension='.pdf')
                 
                 if pdf_path.endswith(".pdf"):
-                    print(pdf_path)
+                    self.show_progressbar()
                     
                     # optimiser cette recherche ?
                     url_pages = self.serie_obj.chapitres[event.widget.cget("text")]
@@ -221,25 +279,21 @@ class SerieFrame(tk.Frame):
         else:
             messagebox.showerror("Error", "Wait until your download finish")
 
-    def download_characters_img(self):
+    def download_characters_img(self, frame, characters):
         with concurrent.futures.ThreadPoolExecutor() as pool:
             futures = []
-            for rank, charac in enumerate(self.serie_obj.get_top20_characters()[0]) :
+            for rank, charac in enumerate(characters) :
                 futures.append(pool.submit(download_element, 
                                         url_page=charac['url_image'], 
-                                        filename=str(rank) + "_" + charac['name'].lower().replace(',','').replace(' ','_'),
+                                        filename=charac["path_image"].replace(DIR_TMP_CHARACTERS,"").split(".")[0],
                                         dir_tmp=DIR_TMP_CHARACTERS))
             
             for future in concurrent.futures.as_completed(futures):
                 msg, filename = future.result()
-                if "GOOD" in msg :
-                    print(msg)
         
-        thread_show_characters = threading.Thread(target=self.show_characters, daemon=True)
+        thread_show_characters = threading.Thread(target=frame.show_elements_plus, daemon=True)
         thread_show_characters.start()
                     
-
-
     def download_cover_serie(self):
         '''
         chrome_opts = uc.ChromeOptions()
@@ -251,14 +305,9 @@ class SerieFrame(tk.Frame):
 
         driver.close()
         '''
-        if len(self.serie_obj.volumes)>0:
-            msg, filename = download_element(self.serie_obj.volumes["1"][0], 
-                                            self.serie_obj.titre.lower().replace(" ","_"), 
-                                            DIR_TMP_COVERS)
-        else :
-            msg, filename = download_element(self.serie_obj.chapitres["1"][0], 
-                                            self.serie_obj.titre.lower().replace(" ","_"), 
-                                            DIR_TMP_COVERS)
+        msg, filename = download_element(self.serie_obj.cover, 
+                                        self.serie_obj.titre.lower().replace(" ","_"), 
+                                        DIR_TMP_COVERS)
 
         if "GOOD" in msg:
             image = Image.open(filename)
@@ -270,14 +319,22 @@ class SerieFrame(tk.Frame):
                                         highlightthickness=0, 
                                         borderwidth=0)
             self.label_cover.pack(side="top", padx=5, pady=5)
-            self.update()
-        else :
-            print(msg)
-            # default cover with "?" 
+            self.update() 
+
+    def show_progressbar(self):
+        self.progressbar["value"] = 0
+        self.downloading = True
+        self.button_back.config(state="disabled")
+
+    def hide_progressbar(self):
+        self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Ready !")
+        self.progressbar["value"] = 0
+        self.downloading = False
+        self.button_back.config(state="normal")
+        self.update()  
 
     def download_volume(self, url_pages, pdf_path):
         self.progressbar.config(maximum=len(url_pages))
-        print("Number Page to DL", len(url_pages))
         
         with concurrent.futures.ThreadPoolExecutor() as pool:
             futures = []
@@ -291,218 +348,18 @@ class SerieFrame(tk.Frame):
                 msg, filename = future.result()
                 if "GOOD" in msg :
                     self.progressbar["value"] = num_page+1
+                    percentage = int(100*(num_page+1)/len(url_pages))
+                    self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Téléchargement: {0} %      ".format(percentage))
                     self.update()
 
-        
+        self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Conversion PDF en cours...")
         convert_to_pdf(pdf_path)
+        self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Conversion PDF terminée")
+        self.hide_progressbar()
+        
         messagebox.showinfo("Done", pdf_path + " successfully downloaded !")
         
         webbrowser.open(pdf_path)
         FileManager().delete_tmp_pages()
         
-        self.button_back.config(state="normal")
-        
-        self.progressbar["value"] = 0
-        self.downloading = False
-        self.update()     
-
-    def onEnter(self, event) :
-        event.widget["relief"] = "groove"
-     
-        
-    def onLeave(self, event) :
-        event.widget["relief"] = "flat"
- 
-
-    def show_characters(self) :
-        # ideas
-        ## change color cover grayscale if already rade
-        
-        top20, top20_i = self.serie_obj.get_top20_characters()
-        n_col = 5
-        n_row = len(top20) // n_col
-        n_col_rest = len(top20) - (n_row*n_col)
-        
-        if n_row > 0:
-            for i in range(n_row):
-                for j in range(n_col) :
-                    name_charact = top20[(i*n_col)+j]["name"]
-
-                    image = Image.open(DIR_TMP_CHARACTERS+top20_i[(i*n_col)+j])
-                    image_resize = image.resize((100, 140))
-                    tk_image = ImageTk.PhotoImage(image_resize)
-                    self.covers_img.append(tk_image)
-                    
-                    label_volume = tk.Label(self.frame_characters.viewport, 
-                                            text=name_charact, 
-                                            image=tk_image,
-                                            font=("Verdana",13),
-                                            fg="white",
-                                            bg="#1e1e1e",
-                                            compound='top',
-                                            wraplength=100,
-                                            highlightthickness=0, 
-                                            borderwidth=0)
-                    
-                    label_volume.grid(row=i,column=j, padx=20, pady=20, sticky='ew')
-                    self.update()
-                
-        if n_col_rest > 0 :
-            for j in range(n_col_rest) :
-                name_charact = top20[(n_row*n_col)+j]["name"]
-                
-                image = Image.open(DIR_TMP_CHARACTERS+top20_i[(n_row*n_col)+j])
-                image_resize = image.resize((100,140))
-                tk_image = ImageTk.PhotoImage(image_resize)
-                self.covers_img.append(tk_image)
-                
-                label_volume = tk.Label(self.frame_characters.viewport, 
-                                        text=name_charact, 
-                                        image=tk_image,
-                                        font=("Verdana",13),
-                                        fg="white",
-                                        bg="#1e1e1e",
-                                        compound='top',
-                                        wraplength=100,
-                                        highlightthickness=0, 
-                                        borderwidth=0)
-                
-                label_volume.grid(row=n_row,column=j, padx=20, pady=20, sticky='ew')
-                self.update() 
-
-        
-    def show_chapters(self) :
-        # ideas
-        ## change color cover grayscale if already rade
-        
-        total_tome = len(self.serie_obj.chapitres)
-        n_col = 5
-        n_row = total_tome // n_col
-        n_col_rest = total_tome - (n_row*n_col)
-        
-        if n_row > 0:
-            for i in range(n_row):
-                for j in range(n_col) :
-                    num_volume = self.serie_obj.get_list_numeros_chapitres()[(i*n_col)+j]
-
-                    image = Image.open(DIR_IMG_ICON+'cover_chapitre.png')
-                    image_resize = image.resize((110, 150))
-                    tk_image = ImageTk.PhotoImage(image_resize)
-                    self.covers_img.append(tk_image)
-                    
-                    label_volume = tk.Label(self.frame_chapitres.viewport, 
-                                            text=num_volume, 
-                                            image=tk_image,
-                                            font=("Impact",13),
-                                            compound='top',
-                                            borderwidth=2, 
-                                            fg="white",
-                                            bg="#1e1e1e",
-                                            relief="flat")
-                    
-                    label_volume.bind("<Button-1>", self.onClickChapter)
-                    label_volume.bind("<Enter>", self.onEnter)
-                    label_volume.bind("<Leave>", self.onLeave)
-                    
-                    label_volume.grid(row=i,column=j, padx=15, pady=20, sticky='ew')
-                    self.update()
-                
-        if n_col_rest > 0 :
-            for j in range(n_col_rest) :
-                num_volume = self.serie_obj.get_list_numeros_chapitres()[(n_row*n_col)+j]
-                
-                image = Image.open(DIR_IMG_ICON+'cover_chapitre.png')
-                image_resize = image.resize((110, 150))
-                tk_image = ImageTk.PhotoImage(image_resize)
-                self.covers_img.append(tk_image)
-                
-                label_volume = tk.Label(self.frame_chapitres.viewport, 
-                                        text=num_volume, 
-                                        image=tk_image,
-                                        font=("Impact",13),
-                                        compound='top',
-                                        borderwidth=2, 
-                                        fg="white",
-                                        bg="#1e1e1e",
-                                        relief="flat")
-                
-                label_volume.bind("<Button-1>", self.onClickChapter)
-                label_volume.bind("<Enter>", self.onEnter)
-                label_volume.bind("<Leave>", self.onLeave)
-                
-                label_volume.grid(row=n_row,column=j, padx=15, pady=20, sticky='ew')
-                self.update() 
-            
-
-    def show_covers(self) :
-        # ideas
-        ## change color cover grayscale if already rade
-        
-        total_tome = len(self.serie_obj.volumes)
-        n_col = 5
-        n_row = total_tome // n_col
-        n_col_rest = total_tome - (n_row*n_col)
-        
-        if n_row > 0:
-            for i in range(n_row):
-                for j in range(n_col) :
-                    num_volume = self.serie_obj.get_list_numeros_volumes()[(i*n_col)+j]
-
-                    # url_cover = self.serie_obj.volumes[num_volume][0]
-                    # get_cover_manga(title_manga, n_vol, url_cover, download_dir)
-                    # cover_path = get_cover_manga(self.serie_obj.titre.lower().replace(" ","_"),
-                    #                            num_volume,
-                    #                            url_cover, 
-                    #                            DIR_TMP_COVERS)
-                    image = Image.open(DIR_IMG_ICON+'cover_manga.png')
-                    image_resize = image.resize((110, 150))
-                    tk_image = ImageTk.PhotoImage(image_resize)
-                    self.covers_img.append(tk_image)
-    
-                    label_volume = tk.Label(self.frame_volumes.viewport, 
-                                            text=num_volume,
-                                            font=("Impact",13),
-                                            image=tk_image,
-                                            fg="white",
-                                            bg="#1e1e1e",
-                                            borderwidth=2,
-                                            compound='top',
-                                            relief="flat")
-                    
-                    label_volume.bind("<Button-1>", self.onClickVolume)
-                    label_volume.bind("<Enter>", self.onEnter)
-                    label_volume.bind("<Leave>", self.onLeave)
-                    
-                    label_volume.grid(row=i,column=j, padx=15, pady=20, sticky='ew')
-                    self.update()
-                
-        if n_col_rest > 0 :
-            for j in range(n_col_rest) :
-                num_volume = self.serie_obj.get_list_numeros_volumes()[(n_row*n_col)+j]
-                # url_cover = self.serie_obj.volumes[num_volume][0]
-                # get_cover_manga(title_manga, n_vol, url_cover, download_dir)
-                # cover_path = get_cover_manga(self.serie_obj.titre.lower().replace(" ","_"),
-                #                            num_volume,
-                #                            url_cover, 
-                #                            DIR_TMP_COVERS)
-                image = Image.open(DIR_IMG_ICON+'cover_manga.png')
-                image_resize = image.resize((110, 150))
-                tk_image = ImageTk.PhotoImage(image_resize)
-                self.covers_img.append(tk_image)
-
-                label_volume = tk.Label(self.frame_volumes.viewport, 
-                                        text=num_volume, 
-                                        font=("Impact",13),
-                                        image=tk_image, 
-                                        fg="white",
-                                        bg="#1e1e1e",
-                                        compound='top',
-                                        borderwidth=2,
-                                        relief="flat")
-                
-                label_volume.bind("<Button-1>", self.onClickVolume)
-                label_volume.bind("<Enter>", self.onEnter)
-                label_volume.bind("<Leave>", self.onLeave)
-                
-                label_volume.grid(row=n_row,column=j, padx=15, pady=20, sticky='ew')
-                self.update()            
+        self.hide_progressbar()       

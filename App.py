@@ -12,14 +12,18 @@ import threading
 from dotenv import load_dotenv
 import pygame
 from frames.LoadingFrame import LoadingFrame
+from frames.OptubeFrame import OptubeFrame
 from frames.ErrorFrame import ErrorFrame
 from frames.SearchingFrame import SearchingFrame
 from frames.SerieFrame import SerieFrame
 from frames.MALRankingFrame import MALRankingFrame
+from frames.SplashScreenFrame import SplashScreenFrame
 import utils.mtTkinter as tk
 from utils.DbManager import MongoDBManager
 from utils.FileManager import FileManager, DIR_IMG_ICON
 from utils.utils import *
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
 class App(tk.Tk):
     
@@ -28,8 +32,8 @@ class App(tk.Tk):
         
         # source : https://yagisanatode.com/2018/02/24/how-to-center-the-main-window-on-the-screen-in-tkinter-with-python-3/
         # Gets the requested values of the height and width.
-        windowWidth = 1000
-        windowHeight = 500
+        windowWidth = 1100
+        windowHeight = 534
         # Gets both half the screen width/height and window width/height
         positionRight = int(self.winfo_screenwidth()/2 - windowWidth/2)
         positionDown = int(self.winfo_screenheight()/3 - windowHeight/2)
@@ -38,43 +42,77 @@ class App(tk.Tk):
         
         self.resizable(False, False)
         self.iconbitmap(DIR_IMG_ICON + 'icon.ico')
-        self.title('Get-Mangas !')
+        self.title('Otaku Apuri (v1.2.0)')
         
-        self.series_available = []
+        self.series_available_sushiscan = []
+        self.series_available_manganato = []
         
         self.current_frame = None
+        self.mongoclient = MongoClient("mongodb+srv://"+os.getenv('USER_PYMONGO')+":"+os.getenv('PASS_PYMONGO')+"@getmangacluster.zmh5nne.mongodb.net/?retryWrites=true&w=majority", 
+                            server_api=ServerApi('1'))
         
-        self.show_loading_frame(random.choice(quotes_anime))
+        #self.show_loading_frame()
+        self.show_splashscreen_frame()
+        #self.show_optube_frame()
+        #self.show_searching_frame()
+        #self.show_serie_frame(MongoDBManager.get_serie_infos_pymongo(self.mongoclient, "Blue Lock", "sushiscan"))
 
-    def set_series_available(self):
-        self.series_available = MongoDBManager.get_all_series()
+    def set_series_available(self, source="sushiscan"):
+        self.series_available_sushiscan = MongoDBManager.get_all_series_pymongo(self.mongoclient, "sushiscan")
+        time.sleep(1)
+        self.series_available_manganato = MongoDBManager.get_all_series_pymongo(self.mongoclient, "manganato")
+        
+        print("Manganato", len(self.series_available_manganato))
+        print("Sushiscan", len(self.series_available_sushiscan))
 
     def show_searching_frame(self):
         """Show the SearchingFrame
         """
-
         if self.current_frame :
             self.current_frame.destroy()
         
         self.current_frame = SearchingFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
         
-        self.title("Get-Mangas ! ["+str(len(self.series_available))+" series available]")
-        
-    def show_loading_frame(self, quote):
-        """Show the LoadingFrame
+        self.title("Otaku Apuri (v1.2.0)")
 
-        Args:
-            quote (str): a quote 
+    def show_splashscreen_frame(self):
+        """Show the SplashScreenFrame
         """
-
         if self.current_frame :
             self.current_frame.destroy()
-            
+
+        self.current_frame = SplashScreenFrame(parent=self)
+        self.current_frame.pack(expand=True, fill="both")
+
+        self.current_frame.after(0, self.current_frame.update, 0)
+
+    def show_optube_frame(self):
+        """Show the OptubeFrame
+        """
+        if self.current_frame :
+            self.current_frame.mediaplayer.stop()
+            self.current_frame.destroy()
+
+        self.current_frame = OptubeFrame(parent=self, app=self)
+        self.current_frame.pack(expand=True, fill="both")
+
+        self.current_frame.splash_screen()
+
+    def show_loading_frame(self):
+        """Show the LoadingFrame
+        - A quote is chose randomly
+        - If while the loading bar is animated
+        
+        """
+        if self.current_frame :
+            self.current_frame.destroy()
+
+        quote = random.choice(quotes_anime)   
         self.current_frame = LoadingFrame(parent=self, quote_txt=quote)
         self.current_frame.pack(expand=True, fill="both")
         
-        if len(self.series_available) == 0:
+        if len(self.series_available_sushiscan) == 0:
             thread = threading.Thread(target=self.set_series_available, daemon=True)
             thread.start()
 
@@ -86,8 +124,8 @@ class App(tk.Tk):
         Args:
             serie (_type_): _description_
         """
-
         if self.current_frame :
+            self.current_frame.mediaplayer.stop()
             self.current_frame.destroy()
             
         self.current_frame = SerieFrame(parent=self, serie_obj=serie)
@@ -98,8 +136,8 @@ class App(tk.Tk):
     def show_malranking_frame(self):
         """_summary_
         """
-
         if self.current_frame :
+            self.current_frame.mediaplayer.stop()
             self.current_frame.destroy()
         
         self.current_frame = MALRankingFrame(parent=self)
@@ -113,7 +151,6 @@ class App(tk.Tk):
         Args:
             error_msg (_type_): _description_
         """
-
         if self.current_frame :
             self.current_frame.destroy()
             
@@ -133,6 +170,8 @@ class App(tk.Tk):
 # TODO : revoir l'aspect graphique de l'application
 # TODO : revoir l'onglet Stats 
 # TODO : essayer d'avoir des onglets de couleurs différentes
+# TODO : Gérer toutes les exceptions
+# TODO : Paginer les chapitres volumes
 
 
 if __name__ == "__main__":
@@ -144,10 +183,12 @@ if __name__ == "__main__":
     # https://github.com/pyinstaller/pyinstaller/issues/5522#issuecomment-770858489
     load_dotenv(dotenv_path=os.path.join(extDataDir, '.env'))
 
-    FileManager.create_tmp_folders()
+    thread_create_folders = threading.Thread(target=FileManager.create_tmp_folders, daemon=True)
+    thread_create_folders.start()
     
     app = App()
     app.mainloop()
     
+    app.mongoclient.close()
     FileManager.delete_tmp_files()
     pygame.quit()

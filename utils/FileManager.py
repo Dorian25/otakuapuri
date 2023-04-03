@@ -19,6 +19,7 @@ DIR_DOC = "docs/"
 DIR_TMP_COVERS = "tmp/covers/"
 DIR_TMP_CHARACTERS = "tmp/characters/"
 DIR_TMP_PAGES = "tmp/pages/"
+DIR_TMP_ANIME = "tmp/anime/"
 
 class FileManager(object):
     # https://stackoverflow.com/questions/30556857/creating-a-static-class-with-no-instances
@@ -42,11 +43,18 @@ class FileManager(object):
         except OSError as error:
             print("Directory '%s' can not be created" % DIR_TMP_CHARACTERS)
 
+        try:
+            os.makedirs(DIR_TMP_ANIME, exist_ok = True)
+            print("Directory '%s' created successfully" % DIR_TMP_ANIME)
+        except OSError as error:
+            print("Directory '%s' can not be created" % DIR_TMP_ANIME)
+
     @staticmethod
     def delete_tmp_files():
         list_covers = os.listdir(DIR_TMP_COVERS)
         list_pages = os.listdir(DIR_TMP_PAGES)
         list_characters = os.listdir(DIR_TMP_CHARACTERS)
+        list_anime = os.listdir(DIR_TMP_ANIME)
         
         if len(list_covers) > 0:
             for file_name in list_covers:
@@ -60,17 +68,23 @@ class FileManager(object):
                 file = DIR_TMP_PAGES + file_name
                 if os.path.isfile(file):
                     os.remove(file)
-
         if len(list_characters) > 0:
             for file_name in list_characters:
                 # construct full file path
                 file = DIR_TMP_CHARACTERS + file_name
                 if os.path.isfile(file):
                     os.remove(file)
+        if len(list_anime) > 0:
+            for file_name in list_anime:
+                # construct full file path
+                file = DIR_TMP_ANIME + file_name
+                if os.path.isfile(file):
+                    os.remove(file)
                 
         print("Deleted","- delete_tmp_files -", str(len(list_covers)), "files have been deleted successfully")
         print("Deleted","- delete_tmp_files -", str(len(list_pages)), "files have been deleted successfully")
         print("Deleted","- delete_tmp_files -", str(len(list_characters)), "files have been deleted successfully")
+        print("Deleted","- delete_tmp_files -", str(len(list_anime)), "files have been deleted successfully")
 
     @staticmethod      
     def delete_tmp_pages():
@@ -96,3 +110,20 @@ class FileManager(object):
                 if os.path.isfile(file):
                     os.remove(file)
         print("Deleted","- delete_tmp_files -", str(len(list_covers)), "files have been deleted successfully")
+
+    @staticmethod    
+    def delete_tmp_anime():
+        list_anime = os.listdir(DIR_TMP_ANIME)
+        
+        if len(list_anime) > 0:
+            for file_name in list_anime:
+                # construct full file path
+                file = DIR_TMP_ANIME + file_name
+                if os.path.isfile(file):
+                    os.remove(file)
+        print("Deleted","- delete_tmp_files -", str(len(list_anime)), "files have been deleted successfully")
+
+    @staticmethod  
+    def delete_file(file_path):
+        if os.path.isfile(file_path):
+            os.remove(file_path)

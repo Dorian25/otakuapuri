@@ -31,20 +31,21 @@ class LoadingFrame(tk.Frame):
         self.config(highlightthickness=0)
         
         # images
-        self.bg_img = ImageTk.PhotoImage(Image.open(DIR_IMG_LOAD + "sea.jpg"))
+        #self.bg_img = ImageTk.PhotoImage(Image.open(DIR_IMG_LOAD + "sea.jpg"))
         self.logo_img = ImageTk.PhotoImage(Image.open(DIR_IMG_LOAD + "logo_128.png"))
         self.parchemin_img = ImageTk.PhotoImage(Image.open(DIR_IMG_LOAD + "parchemin_500.png"))
         
         # widgets
-        self.canvas = tk.Canvas(self, width=1000, 
-                                height=500, 
+        self.canvas = tk.Canvas(self, width=1100, 
+                                height=534, 
                                 bd=0,
+                                background="#1e1e1e",
                                 highlightthickness=0,
                                 relief='ridge')
     
-        self.canvas.create_image(0,0, image=self.bg_img , anchor="nw") 
-        self.canvas.create_image(500,200, image=self.logo_img)
-        self.canvas.create_image(500,380, image=self.parchemin_img)
+        #self.canvas.create_image(0,0, image=self.bg_img , anchor="nw") 
+        self.canvas.create_image(550,200, image=self.logo_img)
+        self.canvas.create_image(550,380, image=self.parchemin_img)
         
         self.canvas.pack(expand=True, fill="both")
         
@@ -63,9 +64,9 @@ class LoadingFrame(tk.Frame):
                                       maximum=self.DEFAULT_MAX_VAL_PB,
                                       value=0)
         
-        self.canvas.create_window(500, 280, window=self.progressbar)
+        self.canvas.create_window(550, 280, window=self.progressbar)
         
-        self.quote_txt = self.canvas.create_text(500,
+        self.quote_txt = self.canvas.create_text(550,
                                                  380,
                                                  fill="black",
                                                  font=("Ink Free",13,"bold"),

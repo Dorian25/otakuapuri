@@ -3,7 +3,6 @@
 block_cipher = None
 
 added_files = [
-         ('docs', 'docs' ),
          ('images', 'images' ),
          ('musics', 'musics' ),
          ('.env','.')

@@ -6,22 +6,26 @@ Created on Wed Oct  5 17:16:36 2022
 """
 
 from utils.utils import *
+from utils.FileManager import DIR_TMP_CHARACTERS
 
-class Serie:
-    """Classe représentaant une série
+class Serie(object):
+    """Classe représentant une série
     """
-    def __init__(self, serie_dict, mal_dict=None):
-        self.annee_sortie = serie_dict["Année de Sortie"] if "Année de Sortie" in serie_dict else ""
-        self.auteur = serie_dict["Auteur"] if "Auteur" in serie_dict else ""
-        self.volumes_dict = {chapitre["Numéro"]: chapitre['Pages'] for chapitre in serie_dict["Chapitres"]}
-        self.dessinateur = serie_dict["Dessinateur"] if "Dessinateur" in serie_dict else ""
-        self.statut = serie_dict["Statut"] if "Statut" in serie_dict else ""
-        self.synopsis = serie_dict["Synopsis"] if "Synopsis" in serie_dict else ""
+    def __init__(self, serie_dict, mal_dict=None, anime_dict=None):
         self.titre = serie_dict["Titre"] if "Titre" in serie_dict else ""
-        self.type_serie = serie_dict["Type"] if "Type" in serie_dict else ""
 
-        self.volumes = {volume["Numéro"]: volume['Pages'] for volume in serie_dict["Volumes"]}
-        self.chapitres = {chapitre["Numéro"]: chapitre['Pages'] for chapitre in serie_dict["Chapitres"]}
+        self.synopsis = serie_dict["Synopsis"] if "Synopsis" in serie_dict else ""
+        
+        self.statut = serie_dict["Statut"] if "Statut" in serie_dict else serie_dict["Status"] if "Status" in serie_dict else "Unknown"
+        self.type = serie_dict["Type"] if "Type" in serie_dict else "Unknown"
+        self.annee_sortie = serie_dict["Année de Sortie"] if "Année de Sortie" in serie_dict else "Unknown"
+        self.auteur = serie_dict["Auteur"] if "Auteur" in serie_dict else "Unknown"
+        self.dessinateur = serie_dict["Dessinateur"] if "Dessinateur" in serie_dict else "Unknown"
+
+        self.volumes = {volume["Numéro"]: volume['Pages'] for volume in serie_dict["Volumes"]} if "Volumes" in serie_dict else {}
+        self.chapitres = {chapitre["Numéro"]: chapitre['Pages'] if 'Pages' in chapitre else [] for chapitre in serie_dict["Chapitres"]} if "Chapitres" in serie_dict else {}
+
+        self.cover = serie_dict["URL_COVER"] if "URL_COVER" in serie_dict else self.get_cover()
         
         # MAL Info
         self.statistics = mal_dict["Statistics"] if mal_dict else None
@@ -29,6 +33,21 @@ class Serie:
         self.characters = mal_dict["Characters"] if mal_dict else []
         self.information = mal_dict["Information"] if mal_dict else None
 
+        # Anime-Sama Info
+        self.versions = anime_dict["Anime"] if anime_dict else {}
+        self.seasons_vostfr = anime_dict["Anime"]["VOSTFR"] if self.versions and "VOSTFR" in self.versions else None
+        self.seasons_vf = anime_dict["Anime"]["VF"] if self.versions and "VF" in self.versions else None
+
+    def get_cover(self):
+        if len(self.volumes)>0:
+            return self.volumes["1"][0]                                   
+        elif len(self.chapitres)>0 :
+            return self.chapitres["1"][0]
+        else :
+            return ""
+        
+    def get_number_versions(self):
+        return len(self.versions)
 
     def get_top20_characters(self):
         """_summary_
@@ -37,11 +56,14 @@ class Serie:
             dict: _description_
         """
         top20characters = sorted(self.characters, key= lambda d: d['n_favorites'], reverse=True)[:20]
-        top20characters_i = [str(rank) + "_" + 
-                            d['name'].lower().replace(',','').replace(' ','_') + 
-                            getFormatImage(d['url_image']) for rank, d in enumerate(top20characters)]
-                            
-        return top20characters, top20characters_i
+
+        for rank, d in enumerate(top20characters):
+            d.update({"path_image": DIR_TMP_CHARACTERS + 
+                                    str(rank) + "_" +  
+                                    d['name'].lower().replace(',','').replace('.','').replace(' ','_') + 
+                                    getFormatImage(d['url_image'])})
+                  
+        return top20characters
 
 
     def get_list_numeros_chapitres(self):

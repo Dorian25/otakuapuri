@@ -12,6 +12,7 @@ import img2pdf
 import urllib.request
 import requests
 import cloudscraper
+from bs4 import BeautifulSoup
 
 import time
 from selenium.webdriver.common.by import By
@@ -20,21 +21,10 @@ import undetected_chromedriver as uc
 from datetime import datetime
 import random
 import pandas as pd
+import re
+from urllib.parse import unquote
 
 #############################################################################
-dict_mois = {"janvier" : "01",
-             "février" : "02",
-             "mars" : "03",
-             "avril" : "04",
-             "mai" : "05",
-             "juin" : "06",
-             "juillet" : "07",
-             "août" : "08",
-             "septembre" : "09",
-             "octobre" : "10",
-             "novembre" : "11",
-             "décembre" : "12"}
-
 # source : https://fictionhorizon.com/best-anime-quotes/
 quotes_anime = ["People’s lives don’t end when they die, it ends when they lose faith.\n\t- Itachi Uchiha (Naruto)",
                 "If you don’t take risks, you can’t create a future!\n\t- Monkey D. Luffy (One Piece)",
@@ -155,6 +145,7 @@ def getFormatImage(image_url) :
     """
 
     format_img = image_url.split("/")[-1].split('?')[0].split(".")[-1]
+
     
     return "."+format_img
 
@@ -181,10 +172,12 @@ def download_element(url_page, filename, dir_tmp) :
         with open(dir_tmp + filename + format_img, 'wb') as f:
             f.write(img_data)
         scraper.close()
+   
         return "[" + str(response.status_code) + "] - " + "GOOD REQUEST", dir_tmp + filename + format_img
     else :
+ 
         return "[" + str(response.status_code) + "] - " + "BAD REQUEST", dir_tmp + filename + format_img
-    
+
     # undetected_chromedriver method
     '''
     if not(os.path.exists(dir_tmp_pages + str(num_page+1) + ".jpg")) :
@@ -204,3 +197,80 @@ def download_element(url_page, filename, dir_tmp) :
     
         return "OK - " +  dir_tmp_pages+str(num_page+1) + ".jpg"
     '''
+
+def top_100_mal(which, page=1):
+    url = "https://myanimelist.net/topmanga.php"
+
+    if which == "All Manga":
+        url += ""
+        if page == 2:
+            url += "?limit=50"
+    elif which == "Top Manga":
+        url += "?type=manga"
+        if page == 2:
+            url += "&limit=50"
+    elif which == "Most Popular":
+        url += "?type=bypopularity"
+        if page == 2:
+            url += "&limit=50"
+
+    response = requests.get(url)
+    html_raw = response.content
+
+    html_bs = BeautifulSoup(html_raw, "lxml")
+
+    list_tr = html_bs.find_all("tr", {"class":"ranking-list"})
+
+    ranking_list = []
+
+    for tr in list_tr:
+        td_rank = tr.find("td", {"class":"rank ac"})
+        rank = td_rank.text.replace("\n","") 
+        
+        td_title = tr.find("td", {"class":"title al va-t clearfix word-break"})
+        h3_title = td_title.find("h3")
+        #div_info = td_title.find("div", {"class":"information di-ib mt4"})
+        #split_info = [info.strip() for info in div_info.text.split("\n")[1:-1]]
+
+        td_score = tr.find("td", {"class":"score ac fs14"})
+        score = td_score.text.replace("\n","") 
+
+        ranking_list.append((rank, h3_title.text, score))
+
+    return ranking_list
+
+def _search_regex(pattern, string, name, flags=0, group=None):
+    """
+    Perform a regex search on the given string, using a single or a list of
+    patterns returning the first matching group.
+    In case of failure return a default value or raise a WARNING or a
+    RegexNotFoundError, depending on fatal, specifying the field name.
+    """
+    
+    mobj = re.search(pattern, string, flags)
+    
+    if mobj:
+        if group is None:
+            # return the first matching group
+            return next(g for g in mobj.groups() if g is not None)
+        else:
+            return mobj.group(group)
+    else:
+        print('unable to extract %s' % name)
+        return None
+    
+def extract_real_url(url):
+    response = requests.get(url)
+    html_raw = response.content.decode('utf-8')
+
+    myvi_id = _search_regex(r'CreatePlayer\s*\(\s*[\"\'].*?\bv=([\da-zA-Z_\W]+)\)',
+                            html_raw, 
+                            'video id')
+    
+    temp1 = myvi_id.split(", ")
+    temp2 = temp1[0].split("\\u0026")
+
+    real_url = unquote(temp2[0])
+
+    return real_url
+

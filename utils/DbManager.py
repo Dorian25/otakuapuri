@@ -64,6 +64,55 @@ class MongoDBManager(object):
             return result
 
     @staticmethod
+    def search_in_mal_pymongo(title_serie):
+        url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
+        headers = {'Content-Type': 'application/json',
+                        'Access-Control-Request-Headers': '*',
+                        'api-key': os.getenv('API_KEY'),
+        }
+
+        action = "aggregate"
+        result = None
+        
+        payload = json.dumps({"collection": "mal",
+                              "database": "getmanga_db",
+                              "dataSource": "GetMangaCluster",
+                              "pipeline": [
+                                            {
+                                                "$search": {
+                                                    "index": "title",
+                                                    "text": {
+                                                        "query": title_serie,
+                                                        "path": {
+                                                            "wildcard": "*"
+                                                            }
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "$limit": 3
+                                            }
+                                            #,
+                                            #{
+                                            #    "$project": {
+                                            #        "score": { "$meta": "searchScore" }
+                                            #    }
+                                            #}
+                                ]
+                              })
+
+
+        try:
+            response = requests.request("POST", url+action, headers=headers, data=payload)
+            response_json = response.json()
+            
+            result = response_json['documents'][0] if len(response_json['documents']) > 0 else None
+        except Exception as e:
+            print("erreur", e)
+            return result
+        finally:
+            return result
+    @staticmethod
     def search_in_sushiscan(title_serie):
         url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
         headers = {'Content-Type': 'application/json',
@@ -103,7 +152,7 @@ class MongoDBManager(object):
             return response_json
 
     @staticmethod
-    def get_serie_infos(titre_serie):
+    def get_serie_infos(titre_serie, website):
         url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
         headers = {'Content-Type': 'application/json',
                         'Access-Control-Request-Headers': '*',
@@ -112,13 +161,12 @@ class MongoDBManager(object):
         action = "findOne"
         serie = None
         
-        payload = json.dumps({"collection": "sushiscan",
+        payload = json.dumps({"collection": website,
                               "database": "getmanga_db",
                               "dataSource": "GetMangaCluster",
                               "filter": {"Titre": titre_serie},
                               "projection": {"_id": 0}
                               })
-
 
         try:
             response = requests.request("POST", url+action, headers=headers, data=payload)
@@ -133,7 +181,7 @@ class MongoDBManager(object):
             return serie
             
     @staticmethod   
-    def get_all_series():
+    def get_all_series(website):
         url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
         headers = {'Content-Type': 'application/json',
                         'Access-Control-Request-Headers': '*',
@@ -142,7 +190,7 @@ class MongoDBManager(object):
         action = "find"
         
         payload = json.dumps({
-            "collection": "sushiscan",
+            "collection": website,
             "database": "getmanga_db",
             "dataSource": "GetMangaCluster",
             "projection": {
@@ -160,6 +208,79 @@ class MongoDBManager(object):
         except:
             print("erreur")
             return []
+
+    @staticmethod
+    def get_all_series_pymongo(client, website):
+        db = client["getmanga_db"]
+
+        website_collection = db[website]
+        response = website_collection.find({}, projection={"_id": 0, "Titre": 1})
+
+        return [doc["Titre"] for doc in response]
+
+    @staticmethod
+    def get_serie_infos_pymongo(client, titre_serie, website):
+        title_edit = titre_serie.split(" – ")[0]
+
+        db = client["getmanga_db"]
+        db_anime = client["anime_db"]
+
+        website_collection = db[website]
+        mal_collection = db["mal"]
+        animesama_collection = db_anime["anime-sama"]
+        
+        response_website = website_collection.find_one({"Titre": titre_serie}, projection={"_id": 0})
+        response_mal = mal_collection.aggregate(pipeline= [{
+                                                    "$search": {
+                                                        "index": "title",
+                                                        "text": {
+                                                            "query": title_edit,
+                                                            "path": {
+                                                                "wildcard": "*"
+                                                                }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "$limit": 1
+                                                }
+                                            #,
+                                            #{
+                                            #    "$project": {
+                                            #        "score": { "$meta": "searchScore" }
+                                            #    }
+                                            #}
+                                                ])
+        response_animesama = animesama_collection.aggregate(pipeline=[{
+                                                    "$search": {
+                                                        "index": "title_animesama",
+                                                        "text": {
+                                                            "query": title_edit,
+                                                            "path": {
+                                                                "wildcard": "*"
+                                                                }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "$limit": 1
+                                                }
+                                            #,
+                                            #{
+                                            #    "$project": {
+                                            #        "score": { "$meta": "searchScore" }
+                                            #    }
+                                            #}
+                                                ])
+        list_mal = list(response_mal)
+        list_animesama = list(response_animesama)
+
+        best_res_mal = list_mal[0] if len(list_mal)>0 else None
+        best_res_animesama = list_animesama[0] if len(list_animesama)>0 else None
+
+        serie = Serie(serie_dict=response_website, mal_dict=best_res_mal, anime_dict=best_res_animesama)
+
+        return serie
                 
 ###
 
