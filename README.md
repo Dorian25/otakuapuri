@@ -28,14 +28,19 @@
 - :bar_chart: **Dashboard** - access multiple information about the database [here](https://charts.mongodb.com/charts-getmanga-rhtkb/public/dashboards/632df18e-f274-4d69-899d-21740a3f593f)
 
 ### Dependencies
+
+:warning: You need to install the latest version of [VLC](https://www.videolan.org/vlc/) to be able to watch video.
+
+:globe_with_meridians: A GOOD AND STABLE INTERNET CONNECTION IS NEEDED
+
 | Library | Usage | Link | 
 | ------ | ------ | ------ |
 | img2pdf | Merge images into a pdf file  | https://gitlab.mister-muffin.de/josch/img2pdf |
 | mtTkinter | MultiThreading with TKinter | https://github.com/RedFantom/mtTkinter |
 | cloudscraper | Scraping with bypassing Cloudfare | https://github.com/VeNoMouS/cloudscraper |
-| pytube | Download Youtube videos |  |
-| python-vlc | Play video with VLC |  |
-| youtube-dl | Download MP4 videos (not youtube) |  |
+| pytube | Download Youtube videos | https://github.com/pytube/pytube |
+| python-vlc | Play video with VLC | https://github.com/oaubert/python-vlc |
+| youtube-dl | Download MP4 videos (not youtube) | https://github.com/ytdl-org/youtube-dl |
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
