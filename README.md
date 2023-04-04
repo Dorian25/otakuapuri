@@ -1,17 +1,40 @@
 [![Generic badge](https://img.shields.io/badge/status-working-green.svg)](https://shields.io/) ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Dorian25/get-mangas?include_prereleases) ![GitHub issues](https://img.shields.io/github/issues/Dorian25/get-mangas) [![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg) [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![GitHub license](https://img.shields.io/github/license/Naereen/StrapDown.js.svg)]([https://github.com/Naereen/StrapDown.js/blob/master/LICENSE](https://github.com/Dorian25/get-mangas/blob/master/LICENSE))
 
 <p align="center">
-  <img width="600" height="400" src="https://media.giphy.com/media/IO2ICudgtBjby/giphy.gif"> 
+  <img src="https://github.com/Dorian25/otakuapuri/blob/master/images/icons/otakuapuri.png"> 
+</p>
+
+Otakuapuri is a manga download and anime streaming application that provides an easy and convenient platform for manga and anime enthusiasts. Users can download their favorite manga in PDF format and stream their favorite anime series. Otakuapuri is written in Python and uses [Tkinter](https://docs.python.org/fr/3/library/tkinter.html) to create the GUI.
+
+<p align="center">
+  <!-- <img width="600" height="400" src="https://media.giphy.com/media/IO2ICudgtBjby/giphy.gif"> -->
+  <img width="600" height="350" src="https://media.giphy.com/media/6FUT75miVgVKE/giphy.gif"/>
 </p>
 <p align="center">Dear Otaku, I hope you are ready ツ</p>
 
 ## Table of content
-- [View Demo](#view-demo)
 - [Features](#features)
+- [View Demo](#view-demo)
+- [Dependencies](#dependencies)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Disclaimer](#disclaimer)
 - [License](#license)
+
+
+
+## Features
+- :mag: **Search engine** - search your favorite manga (through more than 800 series available)
+- :inbox_tray: **Manga-Downloader** - download the whole volume or the last chapter in pdf 
+- :: **Anime Streaming** - Users can stream their favorite anime series directly from the Otakuapuri platform. The anime series are organized by genre, release date, and popularity, and users can search for specific titles.
+- :play: **Anime Openings and Endings** - Users can also watch anime openings and endings from the Otakuapuri platform.
+- :sound: **Mediaplayer** - listen to the cream of the crop of the most popular anime OST
+- :trophy: **Top 100** - best manga according to [MyAnimeList](https://myanimelist.net/)
+- :question: **Random manga** - if you want to discover a new manga, you can choose one at random
+- :bar_chart: **Dashboard** - access multiple information about the database [here](https://charts.mongodb.com/charts-getmanga-rhtkb/public/dashboards/632df18e-f274-4d69-899d-21740a3f593f)
+
+
+
 
 ## View Demo
 <p align="center">
@@ -19,13 +42,7 @@
 </p>
 <p align="center">A small demo to show how the software works ツ</p>
 
-## Features
-- :mag: **Search engine** - search your favorite manga (through more than 800 series available)
-- :inbox_tray: **Manga-Downloader** - download the whole volume or the last chapter in pdf 
-- :sound: **Mediaplayer** - listen to the cream of the crop of the most popular anime OST
-- :trophy: **Top 100** - best manga according to [MyAnimeList](https://myanimelist.net/)
-- :question: **Random manga** - if you want to discover a new manga, you can choose one at random
-- :bar_chart: **Dashboard** - access multiple information about the database [here](https://charts.mongodb.com/charts-getmanga-rhtkb/public/dashboards/632df18e-f274-4d69-899d-21740a3f593f)
+
 
 ### Dependencies
 
