@@ -2,13 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 import vlc
 from PIL import Image, ImageTk
-from utils.FileManager import DIR_IMG_ICON, DIR_TMP_ANIME
+from utils.FileManager import DIR_IMG_ICON, DIR_TMP_ANIME, DIR_TMP
 from utils.utils import extract_real_url
 import threading
-import yt_dlp
 import youtube_dl
-import io
-import time
+import logging
 
 class VideoPlayerFrame(tk.Frame):
     # source = https://gitlab.com/SafwanLjd/PyTkinterVLC/-/blob/master/tkvlc/__init__.py
@@ -22,7 +20,6 @@ class VideoPlayerFrame(tk.Frame):
         self.images = []  # to hold the newly created image
 
         self.p_bar = p_bar
-        self.buffer = io.BytesIO()
         
         self.vo = vo
         self.vf = vf
@@ -47,11 +44,6 @@ class VideoPlayerFrame(tk.Frame):
 
         self.video_frame = tk.Frame(self, background="black")
         self.video_frame.pack(fill="both", expand="True", side="bottom")
-
-        #self.overlay = tk.Canvas(self, background="black")
-        #self.overlay.pack()
-        #self.create_overlay(50, 50, 250, 150, fill='grey', alpha=.5)
-        #self.create_overlay(80, 80, 150, 120, fill='#800000', alpha=.8)
 
         self.no_signal = tk.Label(self.video_frame, text="NO SIGNAL", fg="white", bg="black", font=('Courier 25 bold'))
         self.no_signal.place(relx=.5, rely=.5, anchor=tk.CENTER)
@@ -213,37 +205,40 @@ class VideoPlayerFrame(tk.Frame):
         thread_download_video = threading.Thread(target=self.__download, args=[video_url], daemon=True)
         thread_download_video.start()
 
-        # Stream Video
-        #thread_download_video = threading.Thread(target=self.__stream, args=[video_url], daemon=True)
-        #thread_download_video.start()
-
-        #self.start_streaming()
-
     def my_hook(self, d):
-        
         if d['status'] == 'finished':
             print('Done downloading, now converting ...')
-            self.media_player.set_media(self.vlc_instance.media_new(d["filename"]))
-            self.start()
-            
+            if not self.media_player.is_playing():
+                self.media_player.set_media(self.vlc_instance.media_new(d["filename"]))
+                self.start()
             self.serieframe.hide_progressbar()
         elif d['status'] == 'downloading' :
             percentage = int((d['downloaded_bytes'] / d['total_bytes']) * 100)
             # on lance la lecture de la vidéo à partir de 10%
-            if percentage == 5 and not self.media_player.is_playing():
-                self.media_player.set_media(self.vlc_instance.media_new(d["filename"]+".part"))
+            if percentage == 10 and not self.media_player.is_playing():
+                self.media_player.set_media(self.vlc_instance.media_new(d["filename"]))
                 self.start()
             self.p_bar["value"] = percentage
-            self.serieframe.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Téléchargement: {0} %      ".format(percentage))
+            self.serieframe.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Video Downloading: {0} %      ".format(percentage))
             self.parent.update()
 
 
     def __download(self, video_url):
         self.serieframe.show_progressbar()
 
+        # créer un objet logger pour les sorties
+        logger = logging.getLogger('youtube_dl')
+        logger.setLevel(logging.DEBUG)
+        handler = logging.FileHandler(DIR_TMP + 'youtube-dl.log', 'w', 'utf-8')
+        logger.addHandler(handler)
+
         ydl_opts = {
             'progress_hooks': [self.my_hook],
-            'quiet': False, 
+            'quiet': True,
+            'logger': logger,
+            "nopart": True,
+            'forceduration': True,
+            'logtostderr': True,
             'outtmpl': DIR_TMP_ANIME + "%(title)s.%(ext)s"
         }
         
@@ -254,49 +249,18 @@ class VideoPlayerFrame(tk.Frame):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download([video_url])
 
-    def __stream(self, video_url):
-        ydl_opts = {
-            'outtmpl': '-',
-            'quiet': True
-        }
-
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            with ydl.download([video_url]) as f:
-                while True:
-                    # Lire les données depuis le fichier téléchargé
-                    data = f.read(1024)
-                    if not data:
-                        break
-                    # Écrire les données dans le tampon
-                    self.buffer.write(data)
-                    # Attendre un peu pour permettre au lecteur VLC de lire les données
-                    time.sleep(0.1)
-
-
     def start(self):
         self.media_player.audio_set_volume(100)
         self.media_player.play()
 
     def exit(self):
         self.media_player.stop()
-        self.destroy()
 
     def is_playing(self):
         return self.media_player.is_playing()
     
     def pause(self):
         return self.media_player.pause()
-
-    def create_overlay(self, x1, y1, x2, y2, **kwargs):
-
-        if 'alpha' in kwargs:
-            alpha = int(kwargs.pop('alpha') * 255)
-            fill = kwargs.pop('fill')
-            fill = self.winfo_rgb(fill) + (alpha,)
-            image = Image.new('RGBA', (x2-x1, y2-y1), fill)
-            self.images.append(ImageTk.PhotoImage(image))
-            self.overlay.create_image(x1, y1, image=self.images[-1], anchor='nw')
-        self.overlay.create_rectangle(x1, y1, x2, y2, **kwargs)
 
     def show_command(self, event):
         global pop
@@ -324,4 +288,3 @@ class VideoPlayerFrame(tk.Frame):
         command_up.pack(side="top")
         command_down = tk.Label(pop, text="< v > ---> Turn Down Volume", fg="white", bg="#1e1e1e", anchor="w")
         command_down.pack(side="top")
-        

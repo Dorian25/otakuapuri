@@ -9,7 +9,7 @@ import tkinter as tk
 import pygame
 from PIL import Image
 
-from utils.FileManager import DIR_IMG_LOAD, DIR_MUSIC_LOAD
+from utils.FileManager import DIR_IMG_LOAD, DIR_MUSIC
 from utils.utils import *
 
 class SplashScreenFrame(tk.Frame):
@@ -31,7 +31,7 @@ class SplashScreenFrame(tk.Frame):
         
     def play_sound(self):
         pygame.mixer.init()
-        pygame.mixer.music.load(DIR_MUSIC_LOAD+"gameboy_start_up.mp3")
+        pygame.mixer.music.load(DIR_MUSIC+"gameboy_start_up.mp3")
         pygame.mixer.music.play(loops=0)
         
     def update(self, ind):

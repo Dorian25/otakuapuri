@@ -42,7 +42,7 @@ class App(tk.Tk):
         
         self.resizable(False, False)
         self.iconbitmap(DIR_IMG_ICON + 'icon.ico')
-        self.title('Otaku Apuri (v1.2.0)')
+        self.title('Otaku Apuri (v1.2.1)')
         
         self.series_available_sushiscan = []
         self.series_available_manganato = []
@@ -74,7 +74,7 @@ class App(tk.Tk):
         self.current_frame = SearchingFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
         
-        self.title("Otaku Apuri (v1.2.0)")
+        self.title("Otaku Apuri (v1.2.1)")
 
     def show_splashscreen_frame(self):
         """Show the SplashScreenFrame

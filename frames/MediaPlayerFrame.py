@@ -7,9 +7,6 @@ Created on Tue Jul 19 09:56:45 2022
 
 import tkinter as tk
 
-import os
-import pygame
-
 from PIL import Image, ImageTk
 import vlc
 
@@ -17,7 +14,7 @@ import datetime
 from time import strftime
 import random
 
-from utils.FileManager import DIR_MUSIC_PLAYLIST, DIR_IMG_MP3, DIR_IMG_ICON
+from utils.FileManager import DIR_IMG_ICON
 
 
 class MusicVLCPlayerFrame(tk.Frame):
@@ -95,7 +92,7 @@ class MusicVLCPlayerFrame(tk.Frame):
         if self.player.is_playing():
             self.player.stop()
             self.var_track_mp.set("⏹ Music Stopped")
-            self.button_play.configure(image=self.bg_stopbutton)
+            self.button_play.configure(image=self.bg_playbutton)
             self.update()
             
         else :
