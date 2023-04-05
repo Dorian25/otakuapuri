@@ -17,23 +17,22 @@ Thank you for your interest in this project and I hope you enjoy the experience 
 
 <p align="center">
   <!-- <img width="600" height="400" src="https://media.giphy.com/media/IO2ICudgtBjby/giphy.gif"> -->
-  <img width="600" height="350" src="https://media.giphy.com/media/6FUT75miVgVKE/giphy.gif"/>
+  <img src="https://media.giphy.com/media/6FUT75miVgVKE/giphy.gif"/>
   
 </p>
 <p align="center">Dear Otaku, I hope you are ready ツ</p>
 
 ## Table of content
 - [Features](#features)
-<!-- - [View Demo](#view-demo) -->
 - [Dependencies](#dependencies)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [Disclaimer](#disclaimer)
 - [License](#license)
-
+<!-- - [View Demo](#view-demo) -->
 
 <p align="center">
-  <img width="900" height="500" src="https://user-images.githubusercontent.com/32178615/229851475-b4b6cc84-eb80-4fb9-ae84-69fbe22e3b00.png"> 
+  <img src="https://user-images.githubusercontent.com/32178615/229851475-b4b6cc84-eb80-4fb9-ae84-69fbe22e3b00.png"> 
 </p>
 <p align="center">Home Page</p>
 
