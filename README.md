@@ -2,6 +2,7 @@
 
 <div align="center">
   <img src="https://github.com/Dorian25/otakuapuri/blob/master/images/icons/otakuapuri.png"> 
+  <img src="https://user-images.githubusercontent.com/32178615/229851475-b4b6cc84-eb80-4fb9-ae84-69fbe22e3b00.png"> 
   <h2>The ultimate app for all anime and manga enthusiasts</h2>
 </div>
 
@@ -18,34 +19,44 @@ Thank you for your interest in this project and I hope you enjoy the experience 
 <p align="center">
   <!-- <img width="600" height="400" src="https://media.giphy.com/media/IO2ICudgtBjby/giphy.gif"> -->
   <img src="https://media.giphy.com/media/6FUT75miVgVKE/giphy.gif"/>
-  
 </p>
 <p align="center">Dear Otaku, I hope you are ready ツ</p>
 
-## Table of content
-- [Features](#features)
-- [Dependencies](#dependencies)
-- [Contributing](#contributing)
-- [Credits](#credits)
-- [Disclaimer](#disclaimer)
-- [License](#license)
+
 <!-- - [View Demo](#view-demo) -->
 
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/32178615/229851475-b4b6cc84-eb80-4fb9-ae84-69fbe22e3b00.png"> 
-</p>
-<p align="center">Home Page</p>
+
 
 ## Features
 - :mag: **Search engine** - search your favorite manga (through more than 800 series available)
+
 - :inbox_tray: **Manga-Downloader** - download the whole volume or the last chapter in pdf 
+<p align="center">
+  <img width="525" height="300" src="https://user-images.githubusercontent.com/32178615/229851518-32368de4-a46d-4420-b19c-b5a945fbd02f.png"> 
+</p>
+
 - :tv: **Anime Streaming** - Users can stream their favorite anime series directly from the Otakuapuri platform.
+<p align="center">
+  <img width="525" height="300" src="https://user-images.githubusercontent.com/32178615/229851555-f77493e1-af8d-498b-93f7-948473bad19c.png"> 
+</p>
+
 - :play_or_pause_button: **Anime Openings and Endings** - Users can also watch anime openings and endings from the Otakuapuri platform.
+<p align="center">
+  <img width="525" height="300" src="https://user-images.githubusercontent.com/32178615/229851495-068b5396-734d-42c2-95e7-ec98e8d819f1.png"> 
+</p>
+
 - :radio: **Mediaplayer** - listen to the cream of the crop of the most popular anime OST
 - :trophy: **Top 100** - best manga according to [MyAnimeList](https://myanimelist.net/)
 - :question: **Random manga** - if you want to discover a new manga, you can choose one at random
 - :bar_chart: **Dashboard** - access multiple information about the database [here](https://charts.mongodb.com/charts-getmanga-rhtkb/public/dashboards/632df18e-f274-4d69-899d-21740a3f593f)
 
+## Sources 
+
+| Source | Content | Language | 
+| ------ | ------ | ------ |
+| [Sushi-scan](https://sushiscan.net/) | Manga | ![fr](https://raw.githubusercontent.com/stevenrskelton/flag-icon/master/png/75/country-4x3/fr.png) |
+| [Anime-sama](https://anime-sama.fr/) | Anime | ![en](https://raw.githubusercontent.com/stevenrskelton/flag-icon/master/png/75/country-4x3/fr.png) ![en](https://raw.githubusercontent.com/stevenrskelton/flag-icon/master/png/75/country-4x3/jp.png) |
+| [Manganato](https://manganato.com/) | Manga | ![fr](https://raw.githubusercontent.com/stevenrskelton/flag-icon/master/png/75/country-4x3/gb.png) |
 
 <!--
 ## View Demo
@@ -55,7 +66,7 @@ Thank you for your interest in this project and I hope you enjoy the experience 
 <p align="center">A small demo to show how the software works ツ</p>
 -->
 
-### Dependencies
+## Dependencies
 
 :warning: You need to install the latest version of [VLC](https://www.videolan.org/vlc/) to be able to watch video.
 
@@ -76,8 +87,6 @@ Pull requests are welcome. Please do not hesitate to contribute to the developme
 For major changes, please open an issue first to discuss what you would like to change.
 
 ## Credits
-- Mangas are collected on [Sushi-Scan](https://sushiscan.net/)
-- Anime are collected on [Anime-Sama](https://anime-sama.fr/)
 - `requirements.txt` was generated with the library [pipreqs](https://github.com/bndr/pipreqs)
 - `.exe` was generated with the library [pyinstaller](https://github.com/pyinstaller/pyinstaller)
 
