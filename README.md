@@ -87,6 +87,7 @@ Pull requests are welcome. Please do not hesitate to contribute to the developme
 For major changes, please open an issue first to discuss what you would like to change.
 
 ## Credits
+- Thanks to @MitchellMason for his [Gameboy-Intro-Generator](https://github.com/MitchellMason/Gameboy-Intro-Generator) which allowed me to make the splash screen of the application with the style of the Gameboy Color
 - `requirements.txt` was generated with the library [pipreqs](https://github.com/bndr/pipreqs)
 - `.exe` was generated with the library [pyinstaller](https://github.com/pyinstaller/pyinstaller)
 
