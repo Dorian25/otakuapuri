@@ -37,7 +37,7 @@ Thank you for your interest in this project and I hope you enjoy the experience 
 
 - :tv: **Anime Streaming** - Users can stream their favorite anime series directly from the Otakuapuri platform.
 <p align="center">
-  <img width="525" height="300" src="https://user-images.githubusercontent.com/32178615/229851555-f77493e1-af8d-498b-93f7-948473bad19c.png"> 
+  <img width="525" height="300" src="https://user-images.githubusercontent.com/32178615/231595440-2c87bb2f-0cc3-44f5-9c3d-e8f7362c43b7.gif"> 
 </p>
 
 - :play_or_pause_button: **Anime Openings and Endings** - Users can also watch anime openings and endings from the Otakuapuri platform.
