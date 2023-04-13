@@ -42,7 +42,7 @@ class App(tk.Tk):
         
         self.resizable(False, False)
         self.iconbitmap(DIR_IMG_ICON + 'icon.ico')
-        self.title('Otaku Apuri (v1.2.1)')
+        self.title('Otaku Apuri (v1.2.2)')
         
         self.series_available_sushiscan = []
         self.series_available_manganato = []
@@ -69,17 +69,23 @@ class App(tk.Tk):
         """Show the SearchingFrame
         """
         if self.current_frame :
+            # Supprimer tous les widgets enfants de la video_frame
+            for child in self.current_frame.winfo_children():
+                child.destroy()
             self.current_frame.destroy()
         
         self.current_frame = SearchingFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
         
-        self.title("Otaku Apuri (v1.2.1)")
+        self.title("Otaku Apuri (v1.2.2)")
 
     def show_splashscreen_frame(self):
         """Show the SplashScreenFrame
         """
         if self.current_frame :
+            # Supprimer tous les widgets enfants de la video_frame
+            for child in self.current_frame.winfo_children():
+                child.destroy()
             self.current_frame.destroy()
 
         self.current_frame = SplashScreenFrame(parent=self)
@@ -92,6 +98,9 @@ class App(tk.Tk):
         """
         if self.current_frame :
             self.current_frame.mediaplayer.stop()
+            # Supprimer tous les widgets enfants de la video_frame
+            for child in self.current_frame.winfo_children():
+                child.destroy()
             self.current_frame.destroy()
 
         self.current_frame = OptubeFrame(parent=self, app=self)
@@ -106,6 +115,9 @@ class App(tk.Tk):
         
         """
         if self.current_frame :
+            # Supprimer tous les widgets enfants de la video_frame
+            for child in self.current_frame.winfo_children():
+                child.destroy()
             self.current_frame.destroy()
 
         quote = random.choice(quotes_anime)   
@@ -126,6 +138,9 @@ class App(tk.Tk):
         """
         if self.current_frame :
             self.current_frame.mediaplayer.stop()
+            # Supprimer tous les widgets enfants de la video_frame
+            for child in self.current_frame.winfo_children():
+                child.destroy()
             self.current_frame.destroy()
             
         self.current_frame = SerieFrame(parent=self, serie_obj=serie)
@@ -138,6 +153,9 @@ class App(tk.Tk):
         """
         if self.current_frame :
             self.current_frame.mediaplayer.stop()
+            # Supprimer tous les widgets enfants de la video_frame
+            for child in self.current_frame.winfo_children():
+                child.destroy()
             self.current_frame.destroy()
         
         self.current_frame = MALRankingFrame(parent=self)
@@ -152,6 +170,9 @@ class App(tk.Tk):
             error_msg (_type_): _description_
         """
         if self.current_frame :
+            # Supprimer tous les widgets enfants de la video_frame
+            for child in self.current_frame.winfo_children():
+                child.destroy()
             self.current_frame.destroy()
             
         self.current_frame = ErrorFrame(parent=self, error_txt=error_msg)
@@ -189,6 +210,9 @@ if __name__ == "__main__":
     app = App()
     app.mainloop()
     
+    if isinstance(app.current_frame, SerieFrame):
+        app.current_frame.frame_anime.stop(quit=True)
+
     app.mongoclient.close()
     FileManager.delete_tmp_files()
     pygame.quit()

@@ -94,15 +94,12 @@ class SerieFrame(tk.Frame):
         self.nav_bar.bind('<<NotebookTabChanged>>', self.onChangeTab)
 
         self.frame_info = tk.Frame(self, borderwidth=0, width=30, background="#252526")
-        self.label_statut = tk.Label(self.frame_info, text=serie_obj.statut, font=self.font_label_frame_info)
-        if serie_obj.statut == "Terminé" or serie_obj.statut == "Completed":
-            self.label_statut.config(bg="#32d74b")
-        elif serie_obj.statut == "En Cours" or serie_obj.statut == "Ongoing":
-            self.label_statut.config(bg="#ff9f0a")
-        elif serie_obj.statut == "Abandonné":
-            self.label_statut.config(bg="#ff375f")
-        elif serie_obj.statut == "En Pause":
-            self.label_statut.config(bg="#98989d")
+        print(self.serie_obj.statut)
+        self.info_status = InfoFrame(self.frame_info, key="Status", value="Finished" if (serie_obj.statut == "Terminé" or serie_obj.statut == "Completed")
+                                                                    else "Publishing" if (serie_obj.statut == "En Cours" or serie_obj.statut == "Ongoing")
+                                                                    else "On Hiatus" if serie_obj.statut == "Abandonné"
+                                                                    else "Paused" if serie_obj.statut == "En Pause"
+                                                                    else "Unknown")
         self.info_type = InfoFrame(self.frame_info, key="Type", value=serie_obj.type)
         self.info_annee = InfoFrame(self.frame_info, key="Year of release", value=serie_obj.annee_sortie)
         self.info_auteur = InfoFrame(self.frame_info, key="Author", value=serie_obj.auteur)
@@ -156,7 +153,7 @@ class SerieFrame(tk.Frame):
         self.button_back.pack(side="left", fill="y")
         self.frame_info.pack(side="left", fill="y")
         
-        self.label_statut.pack(side="bottom", fill="x", padx=5, pady=5)
+        self.info_status.pack(side="bottom", fill="x", padx=5)
         self.info_type.pack(side="bottom", fill="x", padx=5)
         self.info_annee.pack(side="bottom", fill="x", padx=5)
         self.info_dessinateur.pack(side="bottom", fill="x", padx=5)
@@ -188,7 +185,7 @@ class SerieFrame(tk.Frame):
                                             self.onClickChapter,
                                             self.serie_obj.get_list_numeros_chapitres())
 
-            self.nav_bar.add(frame_chapters, text="Chapitres ("+ str(self.serie_obj.get_number_chapitres()) +")")
+            self.nav_bar.add(frame_chapters, text="Chapters ("+ str(self.serie_obj.get_number_chapitres()) +")")
             
             self.thread_show_chapters = threading.Thread(target=frame_chapters.show_elements,daemon=True)
             self.thread_show_chapters.start()
@@ -197,7 +194,7 @@ class SerieFrame(tk.Frame):
             characters = self.serie_obj.get_top20_characters()
             frame_characters = ScrollableFrame(self.nav_bar, type_filter="advanced", elements=characters)
 
-            self.nav_bar.add(frame_characters, text="Personnages")
+            self.nav_bar.add(frame_characters, text="Characters")
 
             self.thread_dl_char = threading.Thread(target=self.download_characters_img, args=(frame_characters, characters), daemon=True)
             self.thread_dl_char.start()
@@ -223,7 +220,8 @@ class SerieFrame(tk.Frame):
             # kill thread
         #TODO : penser à kill le vlc si l'anime est en cours - appel à la fonction exit()
         if self.frame_anime:
-            self.frame_anime.exit()
+            self.frame_anime.stop(quit=True)
+            time.sleep(1.5)
 
         self.parent.show_searching_frame()
         FileManager().delete_tmp_files()
@@ -232,7 +230,6 @@ class SerieFrame(tk.Frame):
         if not self.downloading :
             if messagebox.askyesno("Download","Download this volume ?") :
                 self.downloading = True
-                self.button_back.config(state="disabled")
                 
                 pdf_path = filedialog.asksaveasfilename(title="Where do you want to save the volume ?",
                                                         filetypes=[("Pdf files",".pdf")],
@@ -249,7 +246,7 @@ class SerieFrame(tk.Frame):
                 else :
                     messagebox.showerror("Error","Please specify a filename that ends with '.pdf'")
             else :
-                self.button_back.config(state="normal")
+                pass
         else :
             messagebox.showerror("Error", "Wait until your download finish")
     
@@ -257,7 +254,7 @@ class SerieFrame(tk.Frame):
         if not self.downloading :
             if messagebox.askyesno("Download","Download this chapter ?") :
                 self.downloading = True
-                self.button_back.config(state="disabled")
+                
                 
                 pdf_path = filedialog.asksaveasfilename(title="Where do you want to save the chapter ?",
                                                         filetypes=[("Pdf files",".pdf")],
@@ -275,7 +272,7 @@ class SerieFrame(tk.Frame):
                 else :
                     messagebox.showerror("Error","Please specify a filename that ends with '.pdf'")
             else :
-                self.button_back.config(state="normal")
+                pass
         else:
             messagebox.showerror("Error", "Wait until your download finish")
 
@@ -295,16 +292,6 @@ class SerieFrame(tk.Frame):
         thread_show_characters.start()
                     
     def download_cover_serie(self):
-        '''
-        chrome_opts = uc.ChromeOptions()
-        chrome_opts.add_argument("--no-sandbox")
-        chrome_opts.add_argument("--headless")
-        driver = uc.Chrome(options=chrome_opts)
-
-        download_cover(self.serie_obj.titre.lower().replace(" ","_"), self.serie_obj.volumes["1"][0], driver)
-
-        driver.close()
-        '''
         msg, filename = download_element(self.serie_obj.cover, 
                                         self.serie_obj.titre.lower().replace(" ","_"), 
                                         DIR_TMP_COVERS)
@@ -324,13 +311,13 @@ class SerieFrame(tk.Frame):
     def show_progressbar(self):
         self.progressbar["value"] = 0
         self.downloading = True
-        self.button_back.config(state="disabled")
+        #self.button_back.config(state="disabled")
 
     def hide_progressbar(self):
         self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Ready !")
         self.progressbar["value"] = 0
         self.downloading = False
-        self.button_back.config(state="normal")
+        #self.button_back.config(state="normal")
         self.update()  
 
     def download_volume(self, url_pages, pdf_path):
@@ -349,17 +336,15 @@ class SerieFrame(tk.Frame):
                 if "GOOD" in msg :
                     self.progressbar["value"] = num_page+1
                     percentage = int(100*(num_page+1)/len(url_pages))
-                    self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Téléchargement: {0} %      ".format(percentage))
+                    self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Downloading ({0}%)      ".format(percentage))
                     self.update()
 
-        self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Conversion PDF en cours...")
+        self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="PDF Conversion in progress")
         convert_to_pdf(pdf_path)
-        self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Conversion PDF terminée")
+        self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Conversion PDF completed")
         self.hide_progressbar()
         
         messagebox.showinfo("Done", pdf_path + " successfully downloaded !")
         
         webbrowser.open(pdf_path)
-        FileManager().delete_tmp_pages()
-        
-        self.hide_progressbar()       
+        FileManager().delete_tmp_pages()   

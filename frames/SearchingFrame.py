@@ -49,6 +49,7 @@ class SearchingFrame(tk.Frame):
         self.bg_button_random = ImageTk.PhotoImage(Image.open(DIR_IMG_ICON + "mystery_box_64.png"))
         self.bg_button_charts = ImageTk.PhotoImage(Image.open(DIR_IMG_ICON + "mongodb_charts_64.png"))
         self.bg_button_optube = ImageTk.PhotoImage(Image.open(DIR_IMG_ICON + "optube_64.png"))
+        self.bg_button_downloader = ImageTk.PhotoImage(Image.open(DIR_IMG_ICON + "downloader_64.png"))
         self.bg_logo = ImageTk.PhotoImage(Image.open(DIR_IMG_ICON + "otakuapuri.png"))
         self.bg_search_icon = ImageTk.PhotoImage(Image.open(DIR_IMG_ICON + "search_icon.png"))
         self.bg_fr_icon = ImageTk.PhotoImage(Image.open(DIR_IMG_ICON + "french_flag.png"))
@@ -94,6 +95,13 @@ class SearchingFrame(tk.Frame):
         self.optube_button.pack(side="top", pady=5)
         self.optube_button.bind("<Button-1>", self.redirect_optube_frame)
         #self.infobulle_optube = InfoBulle(self.optube_button, "Watch the best Opening Anime")
+
+        self.downloader_button = tk.Label(self.scrollable_app, 
+                                          image=self.bg_button_downloader, 
+                                          background="#1e1e1e", 
+                                          cursor="@"+DIR_IMG_ICON+"aero_link.cur")
+        self.downloader_button.pack(side="top", pady=5)
+        self.downloader_button.bind("<Button-1>", self.redirect_downloader_frame)
 
         self.canvas = tk.Canvas(self, 
                                 width=1000, 
@@ -176,6 +184,10 @@ class SearchingFrame(tk.Frame):
     def redirect_optube_frame(self, event):
         pygame.quit()
         self.parent.show_optube_frame()
+
+    def redirect_downloader_frame(self, event):
+        pygame.quit()
+        #self.parent.show_downloader_frame()
 
     def choose_language(self, event):
         if self.var_source.get() == 'EN':
