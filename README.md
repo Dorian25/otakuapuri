@@ -32,17 +32,17 @@ Thank you for your interest in this project and I hope you enjoy the experience 
 
 - :inbox_tray: **Manga-Downloader** - download the whole volume or the last chapter in pdf 
 <p align="center">
-  <img width="525" height="300" src="https://user-images.githubusercontent.com/32178615/229851518-32368de4-a46d-4420-b19c-b5a945fbd02f.png"> 
+  <img width="547" height="280" src="https://user-images.githubusercontent.com/32178615/229851518-32368de4-a46d-4420-b19c-b5a945fbd02f.png"> 
 </p>
 
 - :tv: **Anime Streaming** - Users can stream their favorite anime series directly from the Otakuapuri platform.
 <p align="center">
-  <img width="525" height="300" src="https://user-images.githubusercontent.com/32178615/229851555-f77493e1-af8d-498b-93f7-948473bad19c.png"> 
+  <img width="547" height="280" src="https://user-images.githubusercontent.com/32178615/231595440-2c87bb2f-0cc3-44f5-9c3d-e8f7362c43b7.gif"> 
 </p>
 
 - :play_or_pause_button: **Anime Openings and Endings** - Users can also watch anime openings and endings from the Otakuapuri platform.
 <p align="center">
-  <img width="525" height="300" src="https://user-images.githubusercontent.com/32178615/229851495-068b5396-734d-42c2-95e7-ec98e8d819f1.png"> 
+  <img width="547" height="280" src="https://user-images.githubusercontent.com/32178615/229851495-068b5396-734d-42c2-95e7-ec98e8d819f1.png"> 
 </p>
 
 - :radio: **Mediaplayer** - listen to the cream of the crop of the most popular anime OST
@@ -87,6 +87,7 @@ Pull requests are welcome. Please do not hesitate to contribute to the developme
 For major changes, please open an issue first to discuss what you would like to change.
 
 ## Credits
+- Thanks to @MitchellMason for his [Gameboy-Intro-Generator](https://github.com/MitchellMason/Gameboy-Intro-Generator) which allowed me to make the splash screen of the application with the style of the Gameboy Color
 - `requirements.txt` was generated with the library [pipreqs](https://github.com/bndr/pipreqs)
 - `.exe` was generated with the library [pyinstaller](https://github.com/pyinstaller/pyinstaller)
 
