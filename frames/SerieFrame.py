@@ -220,6 +220,7 @@ class SerieFrame(tk.Frame):
             # kill thread
         #TODO : penser à kill le vlc si l'anime est en cours - appel à la fonction exit()
         if self.frame_anime:
+            self.frame_anime.unset_bindings()
             self.frame_anime.stop(quit=True)
             time.sleep(1.5)
 
@@ -322,7 +323,27 @@ class SerieFrame(tk.Frame):
 
     def download_volume(self, url_pages, pdf_path):
         self.progressbar.config(maximum=len(url_pages))
-        
+        n_downloaded = 0
+
+        for num_page, url_img_page in enumerate(url_pages) :
+            msg, filename = download_element(url_page=url_img_page,
+                                filename=str(num_page+1),
+                                dir_tmp=DIR_TMP_PAGES)
+            
+            if "GOOD" in msg:
+                self.progressbar["value"] = num_page+1
+                percentage = int(100*(num_page+1)/len(url_pages))
+                self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Downloading pages {0}/{1} ({2}%)      ".format(num_page+1, len(url_pages),percentage))
+                self.update()
+                n_downloaded += 1
+            else :
+                messagebox.showerror("An error occurred while downloading the manga !")
+                break
+            
+            # some delay
+            time.sleep(random.random())
+
+        """
         with concurrent.futures.ThreadPoolExecutor() as pool:
             futures = []
             for num_page, url_img_page in enumerate(url_pages) :
@@ -338,13 +359,15 @@ class SerieFrame(tk.Frame):
                     percentage = int(100*(num_page+1)/len(url_pages))
                     self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Downloading ({0}%)      ".format(percentage))
                     self.update()
+        """
 
-        self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="PDF Conversion in progress")
-        convert_to_pdf(pdf_path)
-        self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Conversion PDF completed")
+        if n_downloaded == len(url_pages):            
+            self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="PDF Conversion in progress")
+            convert_to_pdf(pdf_path)
+            self.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Conversion PDF completed")
+            
+            messagebox.showinfo("Done", pdf_path + " successfully downloaded !")
+            webbrowser.open(pdf_path)
+
         self.hide_progressbar()
-        
-        messagebox.showinfo("Done", pdf_path + " successfully downloaded !")
-        
-        webbrowser.open(pdf_path)
         FileManager().delete_tmp_pages()   

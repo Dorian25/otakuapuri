@@ -126,14 +126,22 @@ class VideoPlayerFrame(tk.Frame):
         self.update()
 
     def __set_bindings(self):
-        self.bind('<space>', lambda event: self.media_player.pause())
-        self.bind('<Right>', lambda event: self.media_player.set_time(self.media_player.get_time() + 10_000))
-        self.bind('<Left>', lambda event: self.media_player.set_time(self.media_player.get_time() - 10_000))
-        self.bind('<Up>', lambda event: self.media_player.audio_set_volume(self.media_player.audio_get_volume() + 5))
-        self.bind('<Down>', lambda event: self.media_player.audio_set_volume(self.media_player.audio_get_volume() - 5))
-        self.bind('f', lambda event: self.toogle_fullscreen())
-        self.bind('m', lambda event: self.toogle_mute())
+        self.app.bind('<space>', lambda event: self.media_player.pause())
+        self.app.bind('<Right>', lambda event: self.media_player.set_time(self.media_player.get_time() + 10_000))
+        self.app.bind('<Left>', lambda event: self.media_player.set_time(self.media_player.get_time() - 10_000))
+        self.app.bind('<Up>', lambda event: self.media_player.audio_set_volume(self.media_player.audio_get_volume() + 5))
+        self.app.bind('<Down>', lambda event: self.media_player.audio_set_volume(self.media_player.audio_get_volume() - 5))
+        self.app.bind('f', lambda event: self.toogle_fullscreen())
+        self.app.bind('m', lambda event: self.toogle_mute())
 
+    def unset_bindings(self):
+        self.app.unbind('<space>')
+        self.app.unbind('<Right>')
+        self.app.unbind('<Left>')
+        self.app.unbind('<Up>')
+        self.app.unbind('<Down>')
+        self.app.unbind('f')
+        self.app.unbind('m')
 
     def __on_tick(self):
         seconds = self.media_player.get_time() // 1000
