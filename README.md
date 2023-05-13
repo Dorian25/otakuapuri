@@ -45,6 +45,11 @@ Thank you for your interest in this project and I hope you enjoy the experience 
   <img width="547" height="280" src="https://user-images.githubusercontent.com/32178615/229851495-068b5396-734d-42c2-95e7-ec98e8d819f1.png"> 
 </p>
 
+- :speech_balloon: **Codec** - Users can chat directly with his favorite manga characters using ChatGPT with an interface similar to the Metal Gear Solid Codec!"
+<p align="center">
+  <img width="547" height="280" src="https://user-images.githubusercontent.com/32178615/237521011-51e785f4-276f-480e-a267-e118e1ce56fa.gif"> 
+</p>
+
 - :radio: **Mediaplayer** - listen to the cream of the crop of the most popular anime OST
 - :trophy: **Top 100** - best manga according to [MyAnimeList](https://myanimelist.net/)
 - :question: **Random manga** - if you want to discover a new manga, you can choose one at random
@@ -80,6 +85,7 @@ Thank you for your interest in this project and I hope you enjoy the experience 
 | pytube | Download Youtube videos | https://github.com/pytube/pytube |
 | python-vlc | Play video with VLC | https://github.com/oaubert/python-vlc |
 | youtube-dl | Download MP4 videos (not youtube) | https://github.com/ytdl-org/youtube-dl |
+| tkwebview2 | Display [pywebview](https://github.com/r0x0r/pywebview) in Tkinter Frame widget | https://github.com/Smart-Space/tkwebview2 |
 
 ## Contributing
 Pull requests are welcome. Please do not hesitate to contribute to the development of the application by proposing improvements, reporting bugs or providing constructive feedback. It is through collaboration and sharing that this project will continue to evolve and improve over time. 
