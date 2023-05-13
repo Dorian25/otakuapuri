@@ -14,13 +14,6 @@ import requests
 import cloudscraper
 from bs4 import BeautifulSoup
 
-import time
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-import undetected_chromedriver as uc
-from datetime import datetime
-import random
-import pandas as pd
 import re
 from urllib.parse import unquote
 
@@ -198,26 +191,20 @@ def download_element(url_page, filename, dir_tmp) :
         return "OK - " +  dir_tmp_pages+str(num_page+1) + ".jpg"
     '''
 
-def top_100_mal(which, page=1):
-    url = "https://myanimelist.net/topmanga.php"
+def top_100_mal(which, page):
+    url = "https://myanimelist.net/topmanga.php?limit=" + str(50 * page)
 
     if which == "All Manga":
         url += ""
-        if page == 2:
-            url += "?limit=50"
     elif which == "Top Manga":
-        url += "?type=manga"
-        if page == 2:
-            url += "&limit=50"
+        url += "&type=manga"
     elif which == "Most Popular":
-        url += "?type=bypopularity"
-        if page == 2:
-            url += "&limit=50"
+        url += "&type=bypopularity"
 
     response = requests.get(url)
     html_raw = response.content
 
-    html_bs = BeautifulSoup(html_raw, "lxml")
+    html_bs = BeautifulSoup(html_raw, "html.parser")
 
     list_tr = html_bs.find_all("tr", {"class":"ranking-list"})
 
@@ -274,3 +261,44 @@ def extract_real_url(url):
 
     return real_url
 
+def talk_to(character_name, title_series, theme):
+    '''
+    Je veux que tu incarnes <character_name> de <serie_name>. 
+    Présente toi et raconte moi une courte anecdote.
+    Essaye de coller au mieux à la personnalité et au caractère du personnage. 
+    Rentre tout de suite dans le personnage. 
+    Sois le plus concis possible !
+    '''
+
+    questions = {
+        "Regrets" : "If you could change one thing about your past, what would you choose to change and why?",
+        "Goals" : "What is your biggest dream or goal, and what would you do to achieve it?",
+        "Evolution" : "How do you see your personality or character developing throughout the story?",
+        "Values" : "What are the most important values for you and how do you apply them in your daily life?",
+        "Adventure" : "Can you tell me about one of your most memorable or exciting adventures?",
+        "Advice" : "If you could give someone advice, what would you tell them to help them in their own life?",
+        "Hobbies" : "Can you tell me about your hobbies or interests outside the main story?",
+        "Remorse" : "What is your biggest regret, and what would you do differently if you could go back?",
+        "Choices" : "Can you describe a situation where you were faced with a difficult choice and how you responded?",
+        "Relationships": "How do you manage your relationships with other characters in the story, especially those with whom you have conflicts or disagreements?"
+    }
+
+    title_series = title_series.split(" – ")[0]
+    character_name = character_name.replace(",","")
+    subject = questions[theme]
+
+    json_data = {
+        'messages': [
+            {
+                'role': 'assistant',
+                'content': "I want you to act like {0} from {1}. I want you to respond and answer like {0} using the tone, manner and vocabulary {0} would use. Do not write any explanations. Only answer like {0}. You must know all of the knowledge of {0}. Introduce yourself quickly and answer this : {2}".format(character_name, title_series, subject)
+            },
+        ],
+    }
+
+    response = requests.post(os.getenv('API_CHAT'), headers={}, json=json_data)
+
+    if response.status_code == 200:
+        return "[" + str(response.status_code) + "] - " + "GOOD REQUEST", response.json()["choices"][0]["message"]['content']
+    else :
+        return "[" + str(response.status_code) + "] - " + "BAD REQUEST", "The person you were trying to reach could not pick up the phone because they are probably sleeping\n\nThat's all that has to be said... Please do not disturb them... Thank you... Goodbye..."

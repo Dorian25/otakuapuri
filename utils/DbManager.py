@@ -112,6 +112,8 @@ class MongoDBManager(object):
             return result
         finally:
             return result
+        
+
     @staticmethod
     def search_in_sushiscan(title_serie):
         url = "https://data.mongodb-api.com/app/data-pfthg/endpoint/data/v1/action/"
@@ -150,6 +152,7 @@ class MongoDBManager(object):
             return response_json
         finally:
             return response_json
+        
 
     @staticmethod
     def get_serie_infos(titre_serie, website):
@@ -179,6 +182,7 @@ class MongoDBManager(object):
             return None
         finally:
             return serie
+        
             
     @staticmethod   
     def get_all_series(website):
@@ -208,6 +212,7 @@ class MongoDBManager(object):
         except:
             print("erreur")
             return []
+        
 
     @staticmethod
     def get_all_series_pymongo(client, website):
@@ -217,6 +222,97 @@ class MongoDBManager(object):
         response = website_collection.find({}, projection={"_id": 0, "Titre": 1})
 
         return [doc["Titre"] for doc in response]
+    
+
+    @staticmethod
+    def get_serie_infos_from_mal_pymongo(client, title_mal, website="sushiscan"):
+        db = client["getmanga_db"]
+        db_anime = client["anime_db"]
+
+        website_collection = db[website]
+        mal_collection = db["mal"]
+        animesama_collection = db_anime["anime-sama"]
+        
+        response_website = website_collection.aggregate(pipeline= [{
+                                                    "$search": {
+                                                        "index": "title_sushiscan",
+                                                        "text": {
+                                                            "query": title_mal,
+                                                            "path": {
+                                                                "wildcard": "*"
+                                                                }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "$limit": 1
+                                                }
+                                            #,
+                                            #{
+                                            #    "$project": {
+                                            #        "score": { "$meta": "searchScore" }
+                                            #    }
+                                            #}
+                                                ])
+        
+        response_mal = mal_collection.aggregate(pipeline= [{
+                                                    "$search": {
+                                                        "index": "title",
+                                                        "text": {
+                                                            "query": title_mal,
+                                                            "path": {
+                                                                "wildcard": "*"
+                                                                }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "$limit": 1
+                                                }
+                                            #,
+                                            #{
+                                            #    "$project": {
+                                            #        "score": { "$meta": "searchScore" }
+                                            #    }
+                                            #}
+                                                ])
+        
+        response_animesama = animesama_collection.aggregate(pipeline=[{
+                                                    "$search": {
+                                                        "index": "title_animesama",
+                                                        "text": {
+                                                            "query": title_mal,
+                                                            "path": {
+                                                                "wildcard": "*"
+                                                                }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "$limit": 1
+                                                }
+                                            #,
+                                            #{
+                                            #    "$project": {
+                                            #        "score": { "$meta": "searchScore" }
+                                            #    }
+                                            #}
+                                                ])
+        
+        list_website = list(response_website)
+        list_mal = list(response_mal)
+        list_animesama = list(response_animesama)
+
+        best_res_website = list_website[0] if len(list_website)>0 else None
+        best_res_mal = list_mal[0] if len(list_mal)>0 else None
+        best_res_animesama = list_animesama[0] if len(list_animesama)>0 else None
+
+        serie = None
+        if best_res_website: 
+            serie = Serie(serie_dict=best_res_website, mal_dict=best_res_mal, anime_dict=best_res_animesama)
+
+        return serie
+
 
     @staticmethod
     def get_serie_infos_pymongo(client, titre_serie, website):

@@ -8,17 +8,26 @@ Created on Sat Jul 16 18:10:45 2022
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+from utils.FileManager import DIR_IMG_ICON
+from tkinter.messagebox import showwarning
+from utils.Dialogue import Dialogue
 
 class ScrollableFrame(tk.Frame):
 # source = https://stackoverflow.com/questions/68362391/using-mousewheel-on-scrollable-frame/68363151#68363151
 
-    def __init__(self, parent, cover_element=None, onClickElement=None, elements=[], type_filter="basic"):
+    def __init__(self, parent, app, title_series, cover_element=None, onClickElement=None, elements=[], type_filter="basic"):
         tk.Frame.__init__(self, parent)
+
+        self.app = app
         self.parent = parent
         self.config(borderwidth=0)
         self.config(highlightthickness=0)
         self.config(bg="#1e1e1e")
 
+        self.credit_talk = 5
+        self.current_dialogue = None
+
+        self.title_series = title_series
         self.elements = elements
         self.onClickElement = onClickElement
         self.cover_element = cover_element
@@ -125,7 +134,20 @@ class ScrollableFrame(tk.Frame):
         elif self.var_filter.get() == "Sorted by favorites : descending":
             self.elements = sorted(self.elements, key= lambda d: d['n_favorites'], reverse=True)
             self.show_elements_plus()
-        
+
+    def onClickCharacter(self, charactername, characterimg):
+        pass
+        """
+        if self.credit_talk > 0 :
+            if self.current_dialogue:
+                if self.current_dialogue.winfo_exists(): # un 
+                    self.current_dialogue.destroy()
+            
+            self.credit_talk -= 1
+            self.current_dialogue = Dialogue(self.app, charactername, characterimg, self.title_series)
+        else :
+            showwarning("0 credits", "You don't have enough credits ! Try later !")
+        """
         
     def show_elements_plus(self):
         # ideas
@@ -156,6 +178,10 @@ class ScrollableFrame(tk.Frame):
                                             wraplength=100,
                                             highlightthickness=0, 
                                             borderwidth=0)
+                    #label_element.bind("<Button-1>", 
+                    #                   lambda event, 
+                    #                   charactername=label_text, 
+                    #                   characterimg=self.elements[(i*n_col)+j]["path_image"] : self.onClickCharacter(charactername, characterimg))
                     
                     label_element.grid(row=i,column=j, padx=30, pady=20, sticky='ew')
                     self.update()
@@ -179,6 +205,10 @@ class ScrollableFrame(tk.Frame):
                                         wraplength=100,
                                         highlightthickness=0, 
                                         borderwidth=0)
+                #label_element.bind("<Button-1>", 
+                #                   lambda event,
+                #                   charactername=label_text,
+                #                   characterimg=self.elements[(n_row*n_col)+j]["path_image"]: self.onClickCharacter(charactername, characterimg))
                 
                 label_volume.grid(row=n_row,column=j, padx=30, pady=20, sticky='ew')
                 self.update()
@@ -217,7 +247,8 @@ class ScrollableFrame(tk.Frame):
                                             borderwidth=2, 
                                             fg="white",
                                             bg="#1e1e1e",
-                                            relief="flat")
+                                            relief="flat",
+                                            cursor="@"+DIR_IMG_ICON+"aero_link.cur")
                     
                     label_element.bind("<Button-1>", self.onClickElement)
                     label_element.bind("<Enter>", self.onEnter)
@@ -243,7 +274,8 @@ class ScrollableFrame(tk.Frame):
                                         borderwidth=2, 
                                         fg="white",
                                         bg="#1e1e1e",
-                                        relief="flat")
+                                        relief="flat",
+                                        cursor="@"+DIR_IMG_ICON+"aero_link.cur")
                 
                 label_element.bind("<Button-1>", self.onClickElement)
                 label_element.bind("<Enter>", self.onEnter)

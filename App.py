@@ -8,6 +8,7 @@ Created on Mon Jul 18 21:20:08 2022
 import os 
 import sys
 import random
+import time
 import threading
 from dotenv import load_dotenv
 import pygame
@@ -24,6 +25,11 @@ from utils.FileManager import FileManager, DIR_IMG_ICON
 from utils.utils import *
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+import clr
+clr.AddReference('System.Windows.Forms')
+clr.AddReference('System.Threading')
+from System.Windows.Forms import Control
+from System.Threading import Thread, ApartmentState, ThreadStart 
 
 class App(tk.Tk):
     
@@ -42,7 +48,7 @@ class App(tk.Tk):
         
         self.resizable(False, False)
         self.iconbitmap(DIR_IMG_ICON + 'icon.ico')
-        self.title('Otaku Apuri (v1.2.2)')
+        self.title('Otaku Apuri (v1.2.5)')
         
         self.series_available_sushiscan = []
         self.series_available_manganato = []
@@ -51,10 +57,8 @@ class App(tk.Tk):
         self.mongoclient = MongoClient("mongodb+srv://"+os.getenv('USER_PYMONGO')+":"+os.getenv('PASS_PYMONGO')+"@getmangacluster.zmh5nne.mongodb.net/?retryWrites=true&w=majority", 
                             server_api=ServerApi('1'))
         
-        #self.show_loading_frame()
         self.show_splashscreen_frame()
         #self.show_optube_frame()
-        #self.show_searching_frame()
         #self.show_serie_frame(MongoDBManager.get_serie_infos_pymongo(self.mongoclient, "Blue Lock", "sushiscan"))
 
     def set_series_available(self, source="sushiscan"):
@@ -77,7 +81,7 @@ class App(tk.Tk):
         self.current_frame = SearchingFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
         
-        self.title("Otaku Apuri (v1.2.2)")
+        self.title("Otaku Apuri (v1.2.5)")
 
     def show_splashscreen_frame(self):
         """Show the SplashScreenFrame
@@ -90,8 +94,6 @@ class App(tk.Tk):
 
         self.current_frame = SplashScreenFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
-
-        self.current_frame.after(0, self.current_frame.update, 0)
 
     def show_optube_frame(self):
         """Show the OptubeFrame
@@ -137,7 +139,8 @@ class App(tk.Tk):
             serie (_type_): _description_
         """
         if self.current_frame :
-            self.current_frame.mediaplayer.stop()
+            if type(self.current_frame) == SearchingFrame:
+                self.current_frame.mediaplayer.stop()
             # Supprimer tous les widgets enfants de la video_frame
             for child in self.current_frame.winfo_children():
                 child.destroy()
@@ -158,7 +161,7 @@ class App(tk.Tk):
                 child.destroy()
             self.current_frame.destroy()
         
-        self.current_frame = MALRankingFrame(parent=self)
+        self.current_frame = MALRankingFrame(parent=self, app=self)
         self.current_frame.pack(expand=True, fill="both")
         
         self.title("Top Manga - MyAnimeList.net")
@@ -194,8 +197,7 @@ class App(tk.Tk):
 # TODO : Gérer toutes les exceptions
 # TODO : Paginer les chapitres volumes
 
-
-if __name__ == "__main__":
+def main():
     extDataDir = os.getcwd()
     if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):        
     	# sys._MEIPASS = C:\Users\xxxx\AppData\Local\Temp\_MEIxxxxxx
@@ -212,7 +214,15 @@ if __name__ == "__main__":
     
     if isinstance(app.current_frame, SerieFrame):
         app.current_frame.frame_anime.stop(quit=True)
+    if isinstance(app.current_frame, OptubeFrame):
+        app.current_frame.quit()
 
     app.mongoclient.close()
     FileManager.delete_tmp_files()
     pygame.quit()
+
+if __name__ == "__main__":
+    t = Thread(ThreadStart(main))
+    t.ApartmentState = ApartmentState.STA
+    t.Start()
+    t.Join()

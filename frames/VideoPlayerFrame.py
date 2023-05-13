@@ -27,6 +27,8 @@ class VideoPlayerFrame(tk.Frame):
         
         self.vlc_instance = vlc.Instance()
         self.media_player = self.vlc_instance.media_player_new()
+        events = self.media_player.event_manager()
+        events.event_attach(vlc.EventType.MediaPlayerEndReached, self.end_mediaplayer)
 
         self.video_length = 0
         self.fullscreen_state = False
@@ -227,18 +229,18 @@ class VideoPlayerFrame(tk.Frame):
         elif d['status'] == 'downloading' :
             if self.cancelled:
                 raise youtube_dl.utils.DownloadError('Download cancelled by user')
-            else :          
-                percentage = int((d['downloaded_bytes'] / d['total_bytes']) * 100)
-                # on lance la lecture de la vidéo à partir de 10%
-                if percentage == 10 and not self.is_playing():
+            else : 
+                percentage = float(d['_percent_str'].strip().replace("%",""))
+                
+                # on lance la lecture de la vidéo à partir de 10% de téléchargement
+                if percentage > 10 and not self.is_playing():
                     self.media_player.set_media(self.vlc_instance.media_new(d["filename"]))
                     self.start()
                 self.p_bar["value"] = percentage
-                self.serieframe.s.configure("red.Horizontal.TProgressbar", foreground='white', text="Downloading:      {0}/{1}/{2}      ({3}%)      ".format(self.var_version.get(), 
-                                                                                                                                                            self.var_season.get(), 
-                                                                                                                                                            self.var_episode.get(), 
-                                                                                                                                                            percentage))
-                
+                self.serieframe.s.configure("red.Horizontal.TProgressbar", 
+                                            foreground='white', 
+                                            text="Downloading:      {0}/{1}/{2}      ({3}%)      ".format(self.var_version.get(), self.var_season.get(), self.var_episode.get(), percentage))
+                 
                 self.parent.update()
 
 
@@ -286,6 +288,9 @@ class VideoPlayerFrame(tk.Frame):
         self.media_player.audio_set_volume(100)
         self.media_player.play()
 
+    def end_mediaplayer(self, event):
+        self.stop()
+
     def stop(self, quit=False):
         print("QUIT", quit)
 
@@ -296,8 +301,10 @@ class VideoPlayerFrame(tk.Frame):
         if self.media_player.get_media() :
             print("Mediaplayer has media", self.media_player.get_media())
             self.media_player.get_media().release()
-            self.media_player.release()
-            #self.media_player.set_media(None)
+            #self.media_player.release() 
+            # ne pas release sinon OSError: exception: access violation writing
+            # car le mediaplayer est release ! donc inactif !
+            self.media_player.set_media(None)
 
         if self.download_state: 
             print("Downloading ok")

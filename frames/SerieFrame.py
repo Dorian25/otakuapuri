@@ -5,6 +5,7 @@ Created on Tue Jul 19 12:09:00 2022
 @author: Dorian
 """
 
+import time
 import webbrowser
 
 import utils.mtTkinter as tk
@@ -15,6 +16,9 @@ from frames.ScrollableFrame import ScrollableFrame
 from frames.StatsFrame import StatsFrame
 from frames.InfoFrame import InfoFrame
 from frames.VideoPlayerFrame import VideoPlayerFrame
+from frames.CodecFrame import CodecFrame
+from frames.MangaReader import MangaReader
+from tkwebview2.tkwebview2 import WebView2, have_runtime, install_runtime
 
 from tkinter import filedialog
 from tkinter import messagebox
@@ -94,7 +98,17 @@ class SerieFrame(tk.Frame):
         self.nav_bar.bind('<<NotebookTabChanged>>', self.onChangeTab)
 
         self.frame_info = tk.Frame(self, borderwidth=0, width=30, background="#252526")
-        print(self.serie_obj.statut)
+        if not have_runtime():#没有webview2 runtime
+                print("install")
+                install_runtime()
+        url = self.serie_obj.volumes["1"][0]
+        if "https://" in url:
+            pass
+        else :
+            url = url.replace("http","https")
+        # webview
+        self.label_cover = WebView2(self.frame_info, 200, 293)
+        self.label_cover.load_url(url) 
         self.info_status = InfoFrame(self.frame_info, key="Status", value="Finished" if (serie_obj.statut == "Terminé" or serie_obj.statut == "Completed")
                                                                     else "Publishing" if (serie_obj.statut == "En Cours" or serie_obj.statut == "Ongoing")
                                                                     else "On Hiatus" if serie_obj.statut == "Abandonné"
@@ -112,7 +126,8 @@ class SerieFrame(tk.Frame):
                                     background="#333333",
                                     image= tk_image_button, 
                                     command=self.return_searching_frame,
-                                    borderwidth=0)
+                                    borderwidth=0,
+                                    cursor="@"+DIR_IMG_ICON+"aero_link.cur")
         
         self.frame_resume = tk.Frame(self, background="#1e1e1e")
         self.label_resume_h = tk.Label(self.frame_resume,
@@ -136,6 +151,7 @@ class SerieFrame(tk.Frame):
                                            value=0)
         
         self.frame_anime = None
+        self.frame_codec = None
         
         '''
         if self.serie_obj.statistics:
@@ -153,6 +169,7 @@ class SerieFrame(tk.Frame):
         self.button_back.pack(side="left", fill="y")
         self.frame_info.pack(side="left", fill="y")
         
+        self.label_cover.pack(side="top", padx=5, pady=5)
         self.info_status.pack(side="bottom", fill="x", padx=5)
         self.info_type.pack(side="bottom", fill="x", padx=5)
         self.info_annee.pack(side="bottom", fill="x", padx=5)
@@ -165,14 +182,16 @@ class SerieFrame(tk.Frame):
         self.launch_threads()
             
     def launch_threads(self):
-        self.thread_dl_cover = threading.Thread(target=self.download_cover_serie, daemon=True)
-        self.thread_dl_cover.start()
+        #self.thread_dl_cover = threading.Thread(target=self.download_cover_serie, daemon=True)
+        #self.thread_dl_cover.start()
 
         if self.serie_obj.get_number_volumes() > 0:
-            frame_volumes = ScrollableFrame(self.nav_bar,
-                                            DIR_IMG_ICON+'cover_manga.png',
-                                            self.onClickVolume,
-                                            self.serie_obj.get_list_numeros_volumes())
+            frame_volumes = ScrollableFrame(parent=self.nav_bar,
+                                            app=self.parent,
+                                            title_series=self.serie_obj.titre,
+                                            cover_element=DIR_IMG_ICON+'cover_manga.png',
+                                            onClickElement=self.onClickVolume,
+                                            elements=self.serie_obj.get_list_numeros_volumes())
 
             self.nav_bar.add(frame_volumes, text="Volumes ("+ str(self.serie_obj.get_number_volumes()) +")")
             
@@ -180,10 +199,12 @@ class SerieFrame(tk.Frame):
             self.thread_show_volumes.start()
             
         if self.serie_obj.get_number_chapitres() > 0:
-            frame_chapters = ScrollableFrame(self.nav_bar, 
-                                            DIR_IMG_ICON+'cover_chapitre.png',
-                                            self.onClickChapter,
-                                            self.serie_obj.get_list_numeros_chapitres())
+            frame_chapters = ScrollableFrame(parent=self.nav_bar,
+                                             app=self.parent, 
+                                             title_series=self.serie_obj.titre,
+                                             cover_element=DIR_IMG_ICON+'cover_chapitre.png',
+                                             onClickElement=self.onClickChapter,
+                                             elements=self.serie_obj.get_list_numeros_chapitres())
 
             self.nav_bar.add(frame_chapters, text="Chapters ("+ str(self.serie_obj.get_number_chapitres()) +")")
             
@@ -192,12 +213,21 @@ class SerieFrame(tk.Frame):
 
         if len(self.serie_obj.characters) > 0:
             characters = self.serie_obj.get_top20_characters()
-            frame_characters = ScrollableFrame(self.nav_bar, type_filter="advanced", elements=characters)
+            frame_characters = ScrollableFrame(parent=self.nav_bar,
+                                               app=self.parent, 
+                                               title_series=self.serie_obj.titre, 
+                                               type_filter="advanced", 
+                                               elements=characters)
 
             self.nav_bar.add(frame_characters, text="Characters")
 
             self.thread_dl_char = threading.Thread(target=self.download_characters_img, args=(frame_characters, characters), daemon=True)
             self.thread_dl_char.start()
+
+            self.frame_codec = CodecFrame(parent=self.nav_bar,
+                                          characters=characters, 
+                                          title_series=self.serie_obj.titre)
+            self.nav_bar.add(self.frame_codec, text="Codec") 
 
         if self.serie_obj.get_number_versions() > 0:
             self.frame_anime = VideoPlayerFrame(self.nav_bar,
@@ -210,9 +240,15 @@ class SerieFrame(tk.Frame):
             self.nav_bar.add(self.frame_anime, text="Anime")
 
     def onChangeTab(self, event):
+        current_tab = self.nav_bar.tab(self.nav_bar.select(), "text")
+
         if self.frame_anime:
             if self.frame_anime.is_playing():
                 self.frame_anime.pause()
+
+        if current_tab == "Codec":
+            if self.frame_codec and not self.frame_codec.is_running:
+                self.frame_codec.set_gui()
 
     def return_searching_frame(self):
         # delete all covers in tmp dir
@@ -246,8 +282,11 @@ class SerieFrame(tk.Frame):
                     t1.start()
                 else :
                     messagebox.showerror("Error","Please specify a filename that ends with '.pdf'")
+                    self.downloading = False
             else :
-                pass
+                # on affiche le MangaReader
+                url_pages = self.serie_obj.volumes[event.widget.cget("text")]
+                reader = MangaReader(self.parent, self.serie_obj.titre + " - Volume " + event.widget.cget("text"), url_pages)
         else :
             messagebox.showerror("Error", "Wait until your download finish")
     
@@ -272,8 +311,11 @@ class SerieFrame(tk.Frame):
                     t1.start()
                 else :
                     messagebox.showerror("Error","Please specify a filename that ends with '.pdf'")
+                    self.downloading = False
             else :
-                pass
+                # on affiche le MangaReader
+                url_pages = self.serie_obj.chapitres[event.widget.cget("text")]
+                reader = MangaReader(self.parent, self.serie_obj.titre + " - Chapitre " + event.widget.cget("text"), url_pages)
         else:
             messagebox.showerror("Error", "Wait until your download finish")
 
@@ -307,7 +349,7 @@ class SerieFrame(tk.Frame):
                                         highlightthickness=0, 
                                         borderwidth=0)
             self.label_cover.pack(side="top", padx=5, pady=5)
-            self.update() 
+            self.update()
 
     def show_progressbar(self):
         self.progressbar["value"] = 0
@@ -337,7 +379,7 @@ class SerieFrame(tk.Frame):
                 self.update()
                 n_downloaded += 1
             else :
-                messagebox.showerror("An error occurred while downloading the manga !")
+                messagebox.showerror("Error", "An error occurred while downloading the manga !\n" + msg)
                 break
             
             # some delay

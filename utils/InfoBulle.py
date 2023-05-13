@@ -1,6 +1,3 @@
-
-
-
 import tkinter as tk
 
 class InfoBulle(tk.Toplevel):
