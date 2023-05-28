@@ -26,13 +26,13 @@ Thank you for your interest in this project and I hope you enjoy the experience 
 <!-- - [View Demo](#view-demo) -->
 
 ## Features
+
 - :mag: **Search engine** - search your favorite manga (through more than 800 series available)
-- :book: **Manga Reader** - read your favorite manga
-<p float="left">
-  <img src="https://github.com/Dorian25/otakuapuri/assets/32178615/85388656-c3a2-489c-ba1a-e0447e1b235a" width="300"/>
-  <img src="https://github.com/Dorian25/otakuapuri/assets/32178615/21c1fd72-1996-457c-803d-42c816f2d69b" width="300"/>
-  <img src="https://github.com/Dorian25/otakuapuri/assets/32178615/4a5468fd-ac9d-4549-912c-2dba7450f4f4" width="300"/>
-</p>
+- :book: **Manga Reader** - ead manga smoothly and enjoyably, zooming in or adjusting the size of dialogue bubbles to suit your preferences.
+
+| :one:                           | :two:                           | :three:                                    |
+| ----------------------------------- | ----------------------------------- | ------------------------------------------- |
+| ![p1](https://github.com/Dorian25/otakuapuri/assets/32178615/85388656-c3a2-489c-ba1a-e0447e1b235a) | ![p2](https://github.com/Dorian25/otakuapuri/assets/32178615/21c1fd72-1996-457c-803d-42c816f2d69b) | ![p3](https://github.com/Dorian25/otakuapuri/assets/32178615/4a5468fd-ac9d-4549-912c-2dba7450f4f4) |
 
 - :inbox_tray: **Manga-Downloader** - download the whole volume or the last chapter in pdf 
 <p align="center">
