@@ -22,13 +22,16 @@ Thank you for your interest in this project and I hope you enjoy the experience 
 </p>
 <p align="center">Dear Otaku, I hope you are ready ツ</p>
 
-
 <!-- - [View Demo](#view-demo) -->
 
-
-
 ## Features
+
 - :mag: **Search engine** - search your favorite manga (through more than 800 series available)
+- :book: **Manga Reader** - read manga smoothly and enjoyably, zooming in or adjusting the size of dialogue bubbles to suit your preferences.
+
+| :one:                           | :two:                           | :three:                                    |
+| ----------------------------------- | ----------------------------------- | ------------------------------------------- |
+| ![p1](https://github.com/Dorian25/otakuapuri/assets/32178615/85388656-c3a2-489c-ba1a-e0447e1b235a) | ![p2](https://github.com/Dorian25/otakuapuri/assets/32178615/21c1fd72-1996-457c-803d-42c816f2d69b) | ![p3](https://github.com/Dorian25/otakuapuri/assets/32178615/4a5468fd-ac9d-4549-912c-2dba7450f4f4) |
 
 - :inbox_tray: **Manga-Downloader** - download the whole volume or the last chapter in pdf 
 <p align="center">
@@ -50,7 +53,7 @@ Thank you for your interest in this project and I hope you enjoy the experience 
   <img width="547" height="280" src="https://user-images.githubusercontent.com/32178615/237521011-51e785f4-276f-480e-a267-e118e1ce56fa.gif"> 
 </p>
 
-- :radio: **Mediaplayer** - listen to the cream of the crop of the most popular anime OST
+- :radio: **Live Radio** - listen to the cream of the crop of the most popular anime OST via live radio [ANISON.FM](https://en.anison.fm/)
 - :trophy: **Top 100** - best manga according to [MyAnimeList](https://myanimelist.net/)
 - :question: **Random manga** - if you want to discover a new manga, you can choose one at random
 - :bar_chart: **Dashboard** - access multiple information about the database [here](https://charts.mongodb.com/charts-getmanga-rhtkb/public/dashboards/632df18e-f274-4d69-899d-21740a3f593f)
