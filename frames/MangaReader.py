@@ -1,6 +1,8 @@
 import tkinter as tk
-from tkwebview2.tkwebview2 import WebView2, have_runtime, install_runtime
+from tkinter import ttk
+from tkwebview2.tkwebview2 import WebView2
 from utils.FileManager import DIR_IMG_ICON
+from utils.utils import edit_url
 from PIL import Image, ImageTk
 
 class MangaReader(tk.Toplevel):
@@ -21,21 +23,11 @@ class MangaReader(tk.Toplevel):
         except Exception as err:
             print(err)
 
-    def edit_url(self, url):
-        if "https://" in url:
-            return url
-        else :
-            return url.replace("http","https")
-
     def __set_gui(self):
-        if not have_runtime():#没有webview2 runtime
-            print("install")
-            install_runtime()
-
         # webview
         self.webview_frame = WebView2(self, 500, 800)
         self.webview_frame.pack(side='top', fill='both', expand=True)
-        self.webview_frame.load_url(self.edit_url(self.list_pages[self.cursor]))
+        self.webview_frame.load_url(edit_url(self.list_pages[self.cursor]))
 
         # cursor
         self.cursor_frame = tk.Frame(self, background="#1e1e1e")
@@ -53,11 +45,13 @@ class MangaReader(tk.Toplevel):
 
         self.current_page_var = tk.StringVar()
         self.current_page_var.set(str(self.cursor+1))
-        self.current_page_label = tk.Label(self.cursor_frame, 
-                                           textvariable=self.current_page_var,
-                                           fg="#7f7f7f",
-                                           bg="#1e1e1e")
-        self.current_page_label.pack(side="left", fill="both", expand=True)
+        self.current_page_selector = ttk.Combobox(self.cursor_frame, 
+                                                  height=30, 
+                                                  width=1, 
+                                                  textvariable=self.current_page_var)
+        self.current_page_selector.bind('<<ComboboxSelected>>', self.onChangePage)
+        self.current_page_selector['values'] = [str(i+1) for i in range(len(self.list_pages))]
+        self.current_page_selector.pack(side="left", fill="both", expand=True)
 
         self.slash_label = tk.Label(self.cursor_frame,
                                          text="/",
@@ -80,18 +74,20 @@ class MangaReader(tk.Toplevel):
                                   cursor="@"+DIR_IMG_ICON+"aero_link.cur")
         self.prev_btn.pack(side="right", padx=(0,150))
         
+    def onChangePage(self, event):
+        self.cursor = int(self.current_page_var.get())-1
+        self.webview_frame.load_url(edit_url(self.list_pages[self.cursor]))
 
     def next(self):
         if self.cursor < len(self.list_pages):
             self.cursor += 1
-            self.webview_frame.load_url(self.edit_url(self.list_pages[self.cursor]))
+            self.webview_frame.load_url(edit_url(self.list_pages[self.cursor]))
             self.current_page_var.set(str(self.cursor + 1))
         else : 
             self.destroy()
 
-
     def prev(self):
         if self.cursor > 0 :
             self.cursor -= 1
-            self.webview_frame.load_url(self.edit_url(self.list_pages[self.cursor]))
+            self.webview_frame.load_url(edit_url(self.list_pages[self.cursor]))
             self.current_page_var.set(str(self.cursor + 1))

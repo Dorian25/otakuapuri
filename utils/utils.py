@@ -97,6 +97,12 @@ def test_internet(host='http://google.com'):
         return True
     except:
         return False
+    
+def edit_url(url):
+    if "https://" in url:
+        return url
+    else :
+        return url.replace("http","https")
 
 def getFormatFile(file):
     return file.split(".")[1]

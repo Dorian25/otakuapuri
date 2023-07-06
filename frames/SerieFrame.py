@@ -98,17 +98,10 @@ class SerieFrame(tk.Frame):
         self.nav_bar.bind('<<NotebookTabChanged>>', self.onChangeTab)
 
         self.frame_info = tk.Frame(self, borderwidth=0, width=30, background="#252526")
-        if not have_runtime():#没有webview2 runtime
-                print("install")
-                install_runtime()
-        url = self.serie_obj.volumes["1"][0]
-        if "https://" in url:
-            pass
-        else :
-            url = url.replace("http","https")
+
         # webview
         self.label_cover = WebView2(self.frame_info, 200, 293)
-        self.label_cover.load_url(url) 
+        self.label_cover.load_url(edit_url(self.serie_obj.volumes["1"][0]) if len(self.serie_obj.volumes)>0 else "https://islandpress.org/sites/default/files/default_book_cover_2015.jpg") 
         self.info_status = InfoFrame(self.frame_info, key="Status", value="Finished" if (serie_obj.statut == "Terminé" or serie_obj.statut == "Completed")
                                                                     else "Publishing" if (serie_obj.statut == "En Cours" or serie_obj.statut == "Ongoing")
                                                                     else "On Hiatus" if serie_obj.statut == "Abandonné"
@@ -243,8 +236,7 @@ class SerieFrame(tk.Frame):
         current_tab = self.nav_bar.tab(self.nav_bar.select(), "text")
 
         if self.frame_anime:
-            if self.frame_anime.is_playing():
-                self.frame_anime.pause()
+            pass
 
         if current_tab == "Codec":
             if self.frame_codec and not self.frame_codec.is_running:
@@ -256,7 +248,6 @@ class SerieFrame(tk.Frame):
             # kill thread
         #TODO : penser à kill le vlc si l'anime est en cours - appel à la fonction exit()
         if self.frame_anime:
-            self.frame_anime.unset_bindings()
             self.frame_anime.stop(quit=True)
             time.sleep(1.5)
 

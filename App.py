@@ -26,10 +26,12 @@ from utils.utils import *
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import clr
+import certifi
 clr.AddReference('System.Windows.Forms')
 clr.AddReference('System.Threading')
 from System.Windows.Forms import Control
 from System.Threading import Thread, ApartmentState, ThreadStart 
+from tkwebview2.tkwebview2 import have_runtime, install_runtime
 
 class App(tk.Tk):
     
@@ -48,18 +50,15 @@ class App(tk.Tk):
         
         self.resizable(False, False)
         self.iconbitmap(DIR_IMG_ICON + 'icon.ico')
-        self.title('Otaku Apuri (v1.2.5)')
+        self.title('Otaku Apuri (v1.2.6)')
         
         self.series_available_sushiscan = []
         self.series_available_manganato = []
         
         self.current_frame = None
         self.mongoclient = MongoClient("mongodb+srv://"+os.getenv('USER_PYMONGO')+":"+os.getenv('PASS_PYMONGO')+"@getmangacluster.zmh5nne.mongodb.net/?retryWrites=true&w=majority", 
-                            server_api=ServerApi('1'))
-        
+                            server_api=ServerApi('1'), tlsCAFile=certifi.where())
         self.show_splashscreen_frame()
-        #self.show_optube_frame()
-        #self.show_serie_frame(MongoDBManager.get_serie_infos_pymongo(self.mongoclient, "Blue Lock", "sushiscan"))
 
     def set_series_available(self, source="sushiscan"):
         self.series_available_sushiscan = MongoDBManager.get_all_series_pymongo(self.mongoclient, "sushiscan")
@@ -81,7 +80,7 @@ class App(tk.Tk):
         self.current_frame = SearchingFrame(parent=self)
         self.current_frame.pack(expand=True, fill="both")
         
-        self.title("Otaku Apuri (v1.2.5)")
+        self.title("Otaku Apuri (v1.2.6)")
 
     def show_splashscreen_frame(self):
         """Show the SplashScreenFrame
@@ -205,6 +204,10 @@ def main():
         extDataDir = sys._MEIPASS
     # https://github.com/pyinstaller/pyinstaller/issues/5522#issuecomment-770858489
     load_dotenv(dotenv_path=os.path.join(extDataDir, '.env'))
+
+    if not have_runtime():#没有webview2 runtime
+        print("install")
+        install_runtime()
 
     thread_create_folders = threading.Thread(target=FileManager.create_tmp_folders, daemon=True)
     thread_create_folders.start()

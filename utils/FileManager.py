@@ -8,6 +8,7 @@ Created on Wed Jul 20 16:30:39 2022
 import os
 
 DIR_IMG = "images/"
+DIR_IMG_HTML = DIR_IMG + "html/"
 DIR_IMG_ICON = DIR_IMG + "icons/"
 DIR_IMG_LOAD = DIR_IMG + "loading/"
 DIR_IMG_SEARCH = DIR_IMG + "searching/"
